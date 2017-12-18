@@ -155,7 +155,7 @@ func mp4ToDream(c *gin.Context) {
 	}
 	// add sound back in if there is any
 	if len(audio) > 1 {
-		out, err := exec.Command("ffmpeg", "-y", "-i", savedFilePath, "-i", newVideo, newVideo).CombinedOutput()
+		out, err := exec.Command("ffmpeg", "-y", "-i", newVideo, "-i", savedFilePath, newVideo).CombinedOutput()
 		if err != nil {
 			log.Error("failed to add sound back", err)
 		}

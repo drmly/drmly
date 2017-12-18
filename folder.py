@@ -96,10 +96,10 @@ def deep_dream(model, output_path, input_image=noise):
 
     count = 1
     #output_list is list of already completed frames if jobs previously started
-    output_list = sorted(glob.iglob(args.input+'/output/*.png'), key=numericalSort)
-    count = len(output_list) + 1
+    # output_list = sorted(glo1b.iglob(args.input+'/output/*.png'), key=numericalSort)
+    # count = len(output_list) + 1
     file_list =sorted(glob.iglob(args.input +'/*.png'), key=numericalSort)
-    for image_file in file_list[count:]:
+    for image_file in file_list:
         if str(args.randomlayer == "noconv"):
             layer=random.choice(no_conv)
             print("layer is noconv" , layer)
