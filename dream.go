@@ -60,7 +60,7 @@ func mp4ToDream(c *gin.Context) {
 	log.Info("saved output dir at path ", outputPath)
 
 	// save the file
-	savedFilePath := fmt.Sprintf("%s/%s", framesDirPath, file.Filename)
+	savedFilePath := fmt.Sprintf("%s/%s", framesDirPath, fullName)
 	if err := c.SaveUploadedFile(file, savedFilePath); err != nil {
 		log.Error("failed to save file at path ", savedFilePath, " err is: ", err)
 	}
@@ -96,8 +96,9 @@ func mp4ToDream(c *gin.Context) {
 	cmd, err := exec.Command("ffmpeg", "-i", savedFilePath, "-vf", "fps=5", "-c:v", "png", framesOut).CombinedOutput()
 	if err != nil {
 		log.Error("failed to make frames", err)
+	} else {
+		log.Info("made frames from MP4 with cmd: ", string(cmd))
 	}
-	log.Info("made frames from MP4 with cmd: ", string(cmd))
 	// deep dream the frames
 	log.Info("inside dreamer loop")
 	it := c.PostForm("iterations")
@@ -108,7 +109,7 @@ func mp4ToDream(c *gin.Context) {
  	li := c.PostForm("li")
 	iw := c.PostForm("iw")
 	log.Info("fruckkkk")
-	cmd, err = exec.Command("python","folder.py", "--input", framesDirPath,  "-it", it, "-oc", oc, "-la", la, "-rl", rl, "-li", li, "-iw", iw  ).CombinedOutput()
+	cmd, err = exec.Command("python3","folder.py", "--input", framesDirPath,  "-it", it, "-oc", oc, "-la", la, "-rl", rl, "-li", li, "-iw", iw  ).CombinedOutput()
 	if err != nil {
 		log.Error("failed to dream", err)
 		c.String(200, "Abort, this app is crashing, can't dream, probs the platform ur using is not OSX Sierra or youre not starting the app from terminal")
@@ -142,24 +143,27 @@ func mp4ToDream(c *gin.Context) {
 	_, err = exec.Command("ffmpeg", "-r", "5", "-f", "image2", "-i", frames, "-vcodec", "libx264", "-crf", "25", "-pix_fmt", "yuv420p", newVideo).CombinedOutput()
 	if err != nil {
 		log.Error("still failing to output a video meh, ", err)
+	} else {
+		log.Info("\nmade mp4 from frames")
 	}
-	log.Info("\nmade mp4 from frames")
 
 	open.Run(basePath + "/videos")
 	open.Run(newVideo)
 
-	// //  is there sound?
-	audio, err := exec.Command("ffprobe", savedFilePath, "-show_streams", "-select_streams", "a", "-loglevel", "error").CombinedOutput()
-	if err != nil {
-		log.Error("Failed to test audio, ", err)
-	}
-	// add sound back in if there is any
-	if len(audio) > 1 {
-		out, err := exec.Command("ffmpeg", "-y", "-i", newVideo, "-i", savedFilePath, newVideo).CombinedOutput()
-		if err != nil {
-			log.Error("failed to add sound back", err)
-		}
-		log.Info("fffmpeg tried to add sound:", string(out))
-	}
-	log.Info("there's no sound")
+	//  is there sound?
+	// audio, err := exec.Command("ffprobe", savedFilePath, "-show_streams", "-select_streams", "a", "-loglevel", "error").CombinedOutput()
+	// if err != nil {
+	// 	log.Error("Failed to test audio, ", err)
+	// }
+	// // add sound back in if there is any
+	// if len(audio) > 1 {
+	// 	out, err := exec.Command("ffmpeg", "-y", "-i", newVideo, "-i", savedFilePath, "-map", "0", "-map", "1", "-c", "copy", "out.mp4").CombinedOutput()
+	// 	if err != nil {
+	// 		log.Error("failed to add sound back", err)
+	// 	}
+	// 	log.Info("fffmpeg tried to add sound:", string(out))
+	// } else {
+
+	// 	log.Info("there's no sound")
+	// }
 }

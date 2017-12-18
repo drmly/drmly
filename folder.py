@@ -109,7 +109,7 @@ def deep_dream(model, output_path, input_image=noise):
         # L2 and gradient
         loss = tf.reduce_mean(tf.square(graph.get_tensor_by_name("import/%s:0" % layer)))
         gradient = tf.gradients(loss, X)[0]
-        if args.linear > 0: #increase iterations this run if doing linear increase
+        if int(args.linear) > 0: #increase iterations this run if doing linear increase
             iter_num += int(args.linear)
             print("increase iter_num to ", iter_num)
         image = np.float32(cv2.imread(image_file))
