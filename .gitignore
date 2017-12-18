@@ -5,7 +5,7 @@ frames/*
 *.gif
 **/*.gif
 **/*.mp4
-gin-bin/
+gin-bin
 tensorflow/
 work/
 src/

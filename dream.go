@@ -105,11 +105,11 @@ func mp4ToDream(c *gin.Context) {
 	oc := c.PostForm("octaves")
 	la := c.PostForm("layer")
 	rl := c.PostForm("rl")
-	// ow:= c.PostForm("ow")
+	ow:= c.PostForm("ow")
  	li := c.PostForm("li")
 	iw := c.PostForm("iw")
 	log.Info("fruckkkk")
-	cmd, err = exec.Command("python3","folder.py", "--input", framesDirPath,  "-it", it, "-oc", oc, "-la", la, "-rl", rl, "-li", li, "-iw", iw  ).CombinedOutput()
+	cmd, err = exec.Command("python3","folder.py", "--input", framesDirPath,  "-it", it, "-oc", oc, "-la", la, "-rl", rl, "-li", li, "-iw", iw, "-ow", ow  ).CombinedOutput()
 	if err != nil {
 		log.Error("failed to dream", err)
 		c.String(200, "Abort, this app is crashing, can't dream, probs the platform ur using is not OSX Sierra or youre not starting the app from terminal")
@@ -151,19 +151,21 @@ func mp4ToDream(c *gin.Context) {
 	open.Run(newVideo)
 
 	//  is there sound?
-	// audio, err := exec.Command("ffprobe", savedFilePath, "-show_streams", "-select_streams", "a", "-loglevel", "error").CombinedOutput()
-	// if err != nil {
-	// 	log.Error("Failed to test audio, ", err)
-	// }
-	// // add sound back in if there is any
-	// if len(audio) > 1 {
-	// 	out, err := exec.Command("ffmpeg", "-y", "-i", newVideo, "-i", savedFilePath, "-map", "0", "-map", "1", "-c", "copy", "out.mp4").CombinedOutput()
-	// 	if err != nil {
-	// 		log.Error("failed to add sound back", err)
-	// 	}
-	// 	log.Info("fffmpeg tried to add sound:", string(out))
-	// } else {
+	audio, err := exec.Command("ffprobe", savedFilePath, "-show_streams", "-select_streams", "a", "-loglevel", "error").CombinedOutput()
+	if err != nil {
+		log.Error("Failed to test audio, ", err)
+	}
+	// add sound back in if there is any
+	// ffmpeg -i 2171447000212516064.mp4 -i gold.mp4  -map 0:v -map 1:a output.mp4 
+	if len(audio) > 1 {
+		log.Info("there's sound in this clip")
+		out, err := exec.Command("ffmpeg", "-y", "-i", newVideo, "-i", savedFilePath, "-map" ,"0:v" , "-map", "1:a", basePath+"/videos/"+name+".mp4").CombinedOutput()
+		if err != nil {
+			log.Error("failed to add sound back", err)
+		}
+		log.Info("fffmpeg tried to add sound:", string(out))
+	} else {
 
-	// 	log.Info("there's no sound")
-	// }
+		log.Info("there's no sound")
+	}
 }

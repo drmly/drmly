@@ -54,7 +54,8 @@ def define_args():
     parser.add_argument("-oc", "--octaves", help="specify octaves", default="2")
     parser.add_argument("-la", "--layer", help="specify layer name", default="mixed4c")
     parser.add_argument("-rl", "--randomlayer", help="specify random layer", default="Default")
-    parser.add_argument("-iw", "--waver", help="randomize the number of iterations up and down by this amount", default="0")
+    parser.add_argument("-iw", "--itwaver", help="randomize the number of iterations up and down by this amount", default="0")
+    parser.add_argument("-ow", "--ocwaver", help="randomize the number of octaves up and down by this amount", default="0")
     return parser.parse_args()
 
 
@@ -109,9 +110,33 @@ def deep_dream(model, output_path, input_image=noise):
         # L2 and gradient
         loss = tf.reduce_mean(tf.square(graph.get_tensor_by_name("import/%s:0" % layer)))
         gradient = tf.gradients(loss, X)[0]
-        if int(args.linear) > 0: #increase iterations this run if doing linear increase
+        if int(args.linear) > 0 and iter_num < 90: #increase iterations this run if doing linear increase
             iter_num += int(args.linear)
             print("increase iter_num to ", iter_num)
+        iw = int(args.itwaver)
+        # ow = int(args.ocwaver)
+        r = bool(random.getrandbits(1))
+        if iw > 0:
+            if iter_num > iw:
+                if r and iter_num < 90:
+                        iter_num += iw
+                else:
+                    iter_num -= iw
+            else:
+                if not r:
+                    iter_num += iw
+        
+        # r = bool(random.getrandbits(1))
+        # if ow > 0:
+        #     if octave_num > ow:
+        #         if r and octave_num < 8:
+        #                 octave_num += ow
+        #         else:
+        #             octave_num -=ow
+        #     else:
+        #         if not r:
+        #             octave_num += ow
+        
         image = np.float32(cv2.imread(image_file))
         octaves = []
         output_path = args.input + "/output/" + str(count) + ".png"
