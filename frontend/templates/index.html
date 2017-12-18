@@ -1,0 +1,166 @@
+<html>
+
+<head>
+    <link rel='icon' href='favicon.ico?v=2' />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta charset='utf-8'>
+    <title>😍😛😴😝😜🤤😒😀DREAMLY</title>
+</head>
+<a href="/">home</a>
+<a href="/downloads">downloads</a>
+<a href="/j">jobs</a>
+<a href="/u/{{.User}}">{{.User}}</a>
+<h1 style="outline:#00FF00">
+    <b>{{ .isWorking }}</b>
+
+</h1>
+<h1>
+    <!-- <a href="https://console.cloud.google.com/storage/browser/deepgif/darwin/?project=dreamly-1">Direct download</a> -->
+    This app version is: {{.v}}
+    <a href="https://console.cloud.google.com/storage/browser/deepgif/darwin/?project=dreamly-1">Check if there's an update.</a>
+</h1>
+<b> Send Feedback to:
+    <br>
+    <br> timothybone@gmail.com
+</b>
+<img src="https://www.googleapis.com/download/storage/v1/b/deepgif/o/.gitignore?generation=1512636471331166&alt=media" alt="">
+<br>
+<br>
+
+<br>
+<b style="color:rgb(187, 50, 130)">
+    here's an easy place to get gifs:
+    <br>
+    <a href="http://giphy.com" target="_blank">giphy</a>
+</b>
+<br> FOLDERS WITH YOUR FILES:
+<br>frames: ~/Desktop/dreamly/frames
+<br>audio: ~/Desktop/dreamly/audio
+<br>video: ~/Desktop/dreamly/video
+<br>logs: ~/Desktop/dreamly/logs
+
+<form action="g" method="post">
+    <input type='file' name="file" />
+
+    <input type="submit">
+</form>
+<div>
+    <b style="color:blueviolet">RIGHT NOW ONLY ACCEPTING GIF AND MP4 FILES</b>
+</div>
+
+asdfasfs
+
+
+<div>
+    <form onsubmit="showHide()" action="/g" method="post" enctype="multipart/form-data">
+        <br>
+        <br>
+        <!-- Deeper dream: <select name="deeper" id="">
+                  <option value="0" selected>0</option>
+                  <option value="1" selected>1</option>
+                  <option value="2" selected>2</option>
+                  <option value="3" selectd>3</option>
+                  <option value="4" selected>4</option>
+                  <option value="5" selected>5</option>
+              </select> -->
+        layer:
+        <select id="sel" class=".sel" name="layer">
+            <option value='mixed3a' selected>Impressionist</option>
+            <option value='mixed3b'>Painting</option>
+            <option value='mixed4a'>Eyes</option>
+            <option value='mixed4b'>Triangles</option>
+            <option value='mixed4c'>Waves</option>
+            <option value='mixed4d'>Tin</option>
+            <option value='mixed4e'>Dogs</option>
+            <option value='mixed5a'>Animal</option>
+            <option value='mixed5b'>Structures</option>
+        </select>
+
+        <br>
+        <br>iterations (recommend 5-40):
+        <input type="number" step="1" max="70" name="iterations" value="1">helpful popup window about what this is
+        <!-- <br><input type="checkbox" name="itr"> make iterations random every frame between 1 -20 -->
+        <br>
+        <br>octaves (recommend 1-4):
+        <input type="number" step="1" max="7" name="octaves" value="1">
+        <br>frames per second: (5 is recommended)
+        <input type="number" , step="1" max="30" , name="fps" value="5">
+        <!-- <br><input type="checkbox" name="ocr"> make  random every frame between 1 -20 -->
+        <!-- <br><br>image net mean: <input type="text" name="image net mean" >
+          <br><br>octave scale: <input type="text" name="octave scale" >
+          <br><br>dream levels: <input type="text" name="dream levels" >
+          <br><br>dream scale coefficient: <input type="text" name="dream scale coefficient" >
+          <br><br>mode (cpu or gpu): <input type="text" name="mode (cpu or gpu)" > Impressionist Paining, Eyes, Triangles, Waves, Tiny Dogs, Animals Structures, Trippy
+          <br><br>export seperate frames: <input type="text" name="mode (cpu or gpu)" > Impressionist Paining, Eyes, Triangles, Waves, Tiny Dogs, Animals Structures, Trippy -->
+        <div>
+            linear increase in iterations:
+            <input type="number" step="1" max="3" name="li" value="0">
+        </div>
+        <div>
+            randomize layer for each frame:
+            <input type="input"  name="rl" value="Default" />
+        </div>
+        <div>
+            waver up or down octaves for each frame:
+            <input type="number" step="1" max="1" name="iw" value="0">
+        </div>
+        <div></div>
+        <br>GIF/MP4 only (for now):
+        <input type='file' name="file" id="imgInp" />
+        <img id="blah" src="#" alt="" />
+        <input id="file" type="submit" value="start dreaming">
+
+    </form>
+    <div>
+    </div>
+    <div id="hidden_div" style="display:none">
+        <h1>File system page is loading, hang on a sec....:) </h1>
+    </div>
+</div>
+
+<script>
+    document.getElementById('file').onchange = function () {
+        $('dir').attr("value", ('Selected file: ' + this.value));
+    };
+
+</script> {{range $i, $a := .gifs}}
+<video class="thevideo" width="320" height="240" controls muted loop>
+    <source src="{{$a}}" type="video/mp4">
+</video>
+{{end}}
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+<form id="form1" runat="server">
+
+</form>
+<script>
+    console.log("i'm logging")
+    select = document.getElementById("sel")
+    select[Math.floor(Math.random() * select.length)].selected = true
+    it = document.getElementById("it")
+
+    //   read the file path
+    function readURL(input) {
+
+        if (input.files && input.files[0]) {
+            var reader = new FileReader();
+
+            reader.onload = function (e) {
+                $('#blah').attr('src', e.target.result);
+
+            }
+
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    $("#imgInp").change(function () {
+        readURL(this);
+    });
+</script>
+<footer>
+    <div>
+        <a href="about">about</a>
+    </div>
+</footer>
+
+</html>
