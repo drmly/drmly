@@ -99,15 +99,18 @@ def deep_dream(model, output_path, input_image=noise):
     #output_list is list of already completed frames if jobs previously started
     # output_list = sorted(glo1b.iglob(args.input+'/output/*.png'), key=numericalSort)
     # count = len(output_list) + 1
+    rl = str(args.randomlayer)
     file_list =sorted(glob.iglob(args.input +'/*.png'), key=numericalSort)
     for image_file in file_list:
-        print("what is args.randomlayer: "+  str(args.randomlayer))
-        if str(args.randomlayer == "noconv"):
+        print("what is args.randomlayer: "+ rl)
+        if  "noconv" in rl:
             # layer=random.choice(no_conv)
             print("layer is noconv" , layer)
-        elif str(args.randomlayer) == "random":
+        elif "random" in rl:
             # layer=random.choice(layer_names)
             print("layer is rl " , layer)
+        elif rl == "Default":
+            print("default layer")
         # L2 and gradient
         loss = tf.reduce_mean(tf.square(graph.get_tensor_by_name("import/%s:0" % layer)))
         gradient = tf.gradients(loss, X)[0]

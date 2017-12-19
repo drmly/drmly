@@ -76,4 +76,4 @@ Roadmap
 License
 -------------
 
-MIT 2017 Timothy Bone 
+MIT 2017 Dreamly Team 

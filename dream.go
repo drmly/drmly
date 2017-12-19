@@ -19,16 +19,12 @@ import (
 var isJob bool
 var basePath string
 
-func mp4ToDream(c *gin.Context) {
-	if isJob {
-		log.WithFields(log.Fields{
-			"job": "mp42dream",
-		}).Info("was denied a new job, job already running")
-		c.String(200, "a job already running, wait til it's finished") //todo implement a queue here instead
-		return
-	}
-	c.String(200, "righteous! a new job started")
+func dream(c *gin.Context) {
+	c.String(200, "righteous! a new job started\n")
 	isJob = true
+	defer func() {
+		isJob = false
+	}()
 	log.WithFields(log.Fields{
 		"job": "mp42dream",
 	}).Info("started a a deep dream job")
@@ -220,5 +216,4 @@ func mp4ToDream(c *gin.Context) {
 		log.Info("there's no sound")
 	}
 	c.Redirect(http.StatusTemporaryRedirect, "/g")
-	isJob = false
 }

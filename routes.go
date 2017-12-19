@@ -15,7 +15,15 @@ func getIndex(c *gin.Context) {
 }
 func postIndex(c *gin.Context) {
 	log.Info("Is this exist?")
-	mp4ToDream(c)
+	if isJob {
+		log.WithFields(log.Fields{
+			"job": "mp42dream",
+		}).Info("was denied a new job, job already running")
+		c.String(200, "a job already running, wait til it's finished") //todo implement a queue here instead
+		return
+	} else {
+		dream(c)
+	}
 	// Design the flow and run it
 	// flow := run.Sequence(
 	// 	run.Parallel(),
