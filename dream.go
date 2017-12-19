@@ -128,8 +128,8 @@ func dream(c *gin.Context) {
 	// create  frames from mp4
 	framesOut := fmt.Sprintf("%s/frames/%s/%s.png", basePath, name, "%d")
 	log.Info("framesOut: ", framesOut)
-	// fps := c.PostForm("fps")
-	cmd, err := exec.Command("ffmpeg", "-i", savedFilePath, "-vf", "fps=5", "-c:v", "png", framesOut).CombinedOutput()
+	fps := c.PostForm("fps")
+	cmd, err := exec.Command("ffmpeg", "-i", savedFilePath, "-vf", "fps="+fps, "-c:v", "png", framesOut).CombinedOutput()
 	if err != nil {
 		log.Error("failed to make frames", err)
 	} else {
@@ -179,7 +179,7 @@ func dream(c *gin.Context) {
 	log.Info("frames to be turned into mp4 at: ", frames)
 	// framesDir := fmt.Sprintf("%s/output/%s.png", framesDirPath, "%d")
 	// ffmpeg -r 5 -f image2 -i ~/Desktop/dreamly/frames/FILENAME/output/%d.png -vcodec libx264 -crf 25 -pix_fmt yuv420p out.mp4
-	_, err = exec.Command("ffmpeg", "-r", "5", "-f", "image2", "-i", frames, "-vcodec", "libx264", "-crf", "25", "-pix_fmt", "yuv420p", newVideo).CombinedOutput()
+	_, err = exec.Command("ffmpeg", "-r", fps, "-f", "image2", "-i", frames, "-vcodec", "libx264", "-crf", "25", "-pix_fmt", "yuv420p", newVideo).CombinedOutput()
 	if err != nil {
 		log.Error("still failing to output a video meh, ", err)
 	} else {

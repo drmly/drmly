@@ -7,6 +7,7 @@
     <title>😍 ß†π∂ 😴</title>
 </head>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.2.0/min/dropzone.min.js"></script>
+
 <body style="background-color:rgb(235, 229, 209)">
     <span>
         <h2>😍∆\.__ </h2>
@@ -57,22 +58,32 @@
                   <option value="4" selected>4</option>
                   <option value="5" selected>5</option>
               </select> -->
-            open which files/folders: frames dir
-            <input type="checkbox" name="of" value="of"> output dir
-            <input type="checkbox" checked name="oo" value="oo"> video dir
-            <input type="checkbox" name="ov" value="ov"> video file
-            <input type="checkbox" checked name="ovf" value="ovf">
+            <div>
+                open which files/folders: frames dir
+                <input type="checkbox" name="of" value="of"> output dir
+                <input type="checkbox" checked name="oo" value="oo"> video dir
+                <input type="checkbox" name="ov" value="ov"> video file
+                <input type="checkbox" checked name="ovf" value="ovf">
+            </div>
+            <div>
+                fps:
+                <input type="number" step="1" max="12" value="5" name="fps">
+            </div>
+
             <br> layer:
-            <select id="sel" class=".sel" name="layer">
-                <option value='mixed3a' selected>Impressionist</option>
-                <option value='mixed3b'>Painting</option>
-                <option value='mixed4a'>Eyes</option>
-                <option value='mixed4b'>Triangles</option>
-                <option value='mixed4c'>Waves</option>
-                <option value='mixed4d'>Tin</option>
-                <option value='mixed4e'>Dogs</option>
-                <option value='mixed5a'>Animal</option>
-                <option value='mixed5b'>Structures</option>
+            <select autofocus id="sel" class=".sel" name="layer">
+                <option value='mixed3a' selected>mixed3a</option>
+                <option value='mixed3b'>mixed3b</option>
+                <option value='mixed4a'>mixed4a</option>
+                <option value='mixed4b'>mixed4b</option>
+                <option value='mixed4c'>mixed4c</option>
+                <option value='mixed4d'>mixed4d</option>
+                <option value='mixed4e'>mixed4e</option>
+                <option value='mixed5a'>mixed5a</option>
+                <option value='mixed5b'>mixed5b</option>
+                <option value='conv2d0'>conv2d0</option>
+                <option value='conv2d1'>conv2d1</option>
+                <option value='conv2d2'>conv2d2</option>
             </select>
 
             <br>
@@ -95,16 +106,22 @@
                 linear increase in iterations:
                 <input type="number" step="1" max="3" name="li" value="0">
             </div>
-
             <div>
-                <!-- randomize layer for each frame: -->
-                <!-- <select name="rl" id=""> -->
-                    <!-- <option value="Default" selected>Off</option> -->
-                    <!-- <option value="random">Yes</option> -->
-                    <!-- <option value="noconv">yes, but no conv</option> -->
-                </select>
+                <!-- randomize layer every 
+                <input type="number" style="1" value="0" name="rle">
+                frame:
+                <select name="rlwf" id=""></select>
+                   <option value="rlef"></option> no conv:
+                   <option value="rlefc"></option>  w/ conv:
+                   <option value="rlefc"></option>  conv only:
+                
+                <select name="rl" id="">
+                    <option value="Default" selected>Off</option>
+                    <option value="random">Yes</option>
+                    <option value="noconv">yes, but no conv</option>
+                </select> -->
             </div>
-            
+
             <div>
                 waver up or down increment for each frame:
                 <input type="number" step="1" max="10" name="iw" value="0">
@@ -153,18 +170,18 @@
 //     });
 // });
 <!-- </script> -->
-<script>
-    console.log("i'm logging")
-    select = document.getElementById("sel")
-    select[Math.floor(Math.random() * select.length)].selected = true
-</script>
-<footer>
-    <div>
-        <a href="about">about</a>
-    </div>
-</footer>
+    <script>
+        console.log("i'm logging")
+        select = document.getElementById("sel")
+        select[Math.floor(Math.random() * select.length)].selected = true
+    </script>
+    <footer>
+        <div>
+            <a href="about">about</a>
+        </div>
+    </footer>
 
-<!-- 
+    <!-- 
 <label class="wrapper" for="states">This label is stacked above the select</label>
 <div class="button dropdown"> 
   <select id="colorselector">
@@ -183,19 +200,16 @@
 <small> -->
 
     <script>
-    $(function() {
-  $('#colorselector').change(function(){
-    $('.colors').hide();
-    $('#' + $(this).val()).show();
-  });
-});
+        $(function () {
+            $('#colorselector').change(function () {
+                $('.colors').hide();
+                $('#' + $(this).val()).show();
+            });
+        });
 // [forked from](http://jsfiddle.net/FvMYz/)
 // [show-hide-based-on-select-option-jquery)(http://stackoverflow.com/questions/2975521/show-hide-div-based-on-select-option-jquery/2975565#2975565)
-</script>
-
-
--->
-<!-- <script type="text/javascript">
+    </script> -->
+    <!-- <script type="text/javascript">
     if(localStorage.openpages){
         alert('You have opened this already in a tab!');
     }else{
