@@ -4,51 +4,52 @@
     <link rel='icon' href='favicon.ico?v=2' />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta charset='utf-8'>
-    <title>😍😛😴😝😜🤤😒😀DREAMLY</title>
+    <title>😍_ß†π∂_😴</title>
 </head>
-<a href="/">home</a>
-<a href="/downloads">downloads</a>
-<a href="/j">jobs</a>
-<a href="/u/{{.User}}">{{.User}}</a>
-<h1 style="outline:#00FF00">
-    <b>{{ .isWorking }}</b>
-
-</h1>
-<h1>
-    <!-- <a href="https://console.cloud.google.com/storage/browser/deepgif/darwin/?project=dreamly-1">Direct download</a> -->
-    <!-- This app version is: {{.v}} -->
-    <!-- <a href="https://console.cloud.google.com/storage/browser/deepgif/darwin/?project=dreamly-1">Check if there's an update.</a> -->
-</h1>
-
-<!-- <img src="https://www.googleapis.com/download/storage/v1/b/deepgif/o/.gitignore?generation=1512636471331166&alt=media" alt=""> -->
-<br>
-<br>
-
-<br>
-<b style="color:rgb(187, 50, 130)">
-    here's an easy place to get mp4s:
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.2.0/min/dropzone.min.js"></script>
+<body style="background-color:rgb(235, 229, 209)">
+    <span>
+        <h2>😍∆\.__ </h2>
+        <h1>ß†π∂</h1>
+        <h2>__./∂ƒ😴</h2>
+    </span>
+    <a href="/">home</a>
+    <a href="/frames">frames</a>
+    <a href="/downloads">downloads</a>
+    <a href="/jobs">jobs</a>
     <br>
-    <a href="http://giphy.com" target="_blank">giphy</a>
-</b>
-<br> FOLDERS WITH YOUR FILES:
-<br>frames: ~/Desktop/dreamly/frames
-<br>audio: ~/Desktop/dreamly/audio
-<br>video: ~/Desktop/dreamly/video
-<br>logs: ~/Desktop/dreamly/logs
-
-<form action="g" method="post">
-    <input type='file' name="file" />
-
-    <input type="submit">
-</form>
-
-
-
-<div>
-    <form onsubmit="showHide()" action="/g" method="post" enctype="multipart/form-data">
+    <br>
+    <br>
+    <b style="color:rgb(187, 50, 130)">
+        here's an easy place to get videos (practice with a short 5 second videos to get paramaters how you like) :
         <br>
-        <br>
-        <!-- Deeper dream: <select name="deeper" id="">
+        <a href="http://giphy.com" target="_blank">giphy</a>
+    </b>
+    <br> FOLDERS WITH YOUR FILES:
+    <br>frames: ~/Desktop/dreamly/frames
+    <br>audio: ~/Desktop/dreamly/audio
+    <br>video: ~/Desktop/dreamly/video
+    <br>logs: ~/Desktop/dreamly/logs
+
+    <!-- todo
+<div>resume a failed download</div> -->
+    <div>
+        <form class="dropzone" onsubmit="showHide()" action="/g" method="post" enctype="multipart/form-data">
+            <br>
+            <br>
+
+            <!-- <select name="algo"> Algo:
+                <option selected value="dream">Deep dream </option>
+                <option disabled value="neural"> Neural style </option>
+                <option disabled value="bddns"> DD & NS blended </option>
+                <option disabled value="neural"> Fast style </option>
+                <option disabled value="bddfs"> DD & FS blended </option>
+                <option disabled value="random">random </option>
+                <option disabled value="random">random each frame </option>
+
+            </select> -->
+            <br>
+            <!-- Deeper dream: <select name="deeper" id="">
                   <option value="0" selected>0</option>
                   <option value="1" selected>1</option>
                   <option value="2" selected>2</option>
@@ -56,112 +57,154 @@
                   <option value="4" selected>4</option>
                   <option value="5" selected>5</option>
               </select> -->
-        layer:
-        <select id="sel" class=".sel" name="layer">
-            <option value='mixed3a' selected>Impressionist</option>
-            <option value='mixed3b'>Painting</option>
-            <option value='mixed4a'>Eyes</option>
-            <option value='mixed4b'>Triangles</option>
-            <option value='mixed4c'>Waves</option>
-            <option value='mixed4d'>Tin</option>
-            <option value='mixed4e'>Dogs</option>
-            <option value='mixed5a'>Animal</option>
-            <option value='mixed5b'>Structures</option>
-        </select>
+            open which files/folders: frames dir
+            <input type="checkbox" name="of" value="of"> output dir
+            <input type="checkbox" checked name="oo" value="oo"> video dir
+            <input type="checkbox" name="ov" value="ov"> video file
+            <input type="checkbox" checked name="ovf" value="ovf">
+            <br> layer:
+            <select id="sel" class=".sel" name="layer">
+                <option value='mixed3a' selected>Impressionist</option>
+                <option value='mixed3b'>Painting</option>
+                <option value='mixed4a'>Eyes</option>
+                <option value='mixed4b'>Triangles</option>
+                <option value='mixed4c'>Waves</option>
+                <option value='mixed4d'>Tin</option>
+                <option value='mixed4e'>Dogs</option>
+                <option value='mixed5a'>Animal</option>
+                <option value='mixed5b'>Structures</option>
+            </select>
 
-        <br>
-        <br>iterations (recommend 5-40):
-        <input type="number" step="1" max="70" name="iterations" value="1">helpful popup window about what this is
-        <!-- <br><input type="checkbox" name="itr"> make iterations random every frame between 1 -20 -->
-        <br>
-        <br>octaves (recommend 1-4):
-        <input type="number" step="1" max="7" name="octaves" value="1">
-        <!-- <br>frames per second: (5 is recommended)
+            <br>
+            <br>iterations (5-40):
+            <input type="number" step="1" max="70" name="iterations" value="1">
+            <!-- <br><input type="checkbox" name="itr"> make iterations random every frame between 1 -20 -->
+            <br>
+            <br>octaves (1-4):
+            <input type="number" step="1" max="7" name="octaves" value="1">
+            <!-- <br>frames per second: (5 is recommended)
         <input type="number" , step="1" max="30" , name="fps" value="5"> -->
-        <!-- <br><input type="checkbox" name="ocr"> make  random every frame between 1 -20 -->
-        <!-- <br><br>image net mean: <input type="text" name="image net mean" >
+            <!-- <br><input type="checkbox" name="ocr"> make  random every frame between 1 -20 -->
+            <!-- <br><br>image net mean: <input type="text" name="image net mean" >
           <br><br>octave scale: <input type="text" name="octave scale" >
           <br><br>dream levels: <input type="text" name="dream levels" >
           <br><br>dream scale coefficient: <input type="text" name="dream scale coefficient" >
           <br><br>mode (cpu or gpu): <input type="text" name="mode (cpu or gpu)" > Impressionist Paining, Eyes, Triangles, Waves, Tiny Dogs, Animals Structures, Trippy
           <br><br>export seperate frames: <input type="text" name="mode (cpu or gpu)" > Impressionist Paining, Eyes, Triangles, Waves, Tiny Dogs, Animals Structures, Trippy -->
-        <div>
-            linear increase in iterations:
-            <input type="number" step="1" max="3" name="li" value="0">
-        </div>
-        <div>
-            randomize layer for each frame:
-            <select name="rl"  id="">
-                <option value="Default" selected>Off</option>
-                <option value="random">Yes</option>
-                <option value="noconv">yes, but no conv</option>
-            </select>
-        </div>
-        <div>
-            waver up or down increment for each frame:
-            <input type="number" step="1" max="1" name="iw" value="0">
-        </div>
-        <div>
+            <div>
+                linear increase in iterations:
+                <input type="number" step="1" max="3" name="li" value="0">
+            </div>
+            <div>
+                randomize layer for each frame:
+                <select name="rl" id="">
+                    <option value="Default" selected>Off</option>
+                    <option value="random">Yes</option>
+                    <option value="noconv">yes, but no conv</option>
+                </select>
+            </div>
+            <div>
+                waver up or down increment for each frame:
+                <input type="number" step="1" max="10" name="iw" value="0">
+            </div>
+            <!-- <div>
             waver up or down octave for each frame:
             <input type="number" step="1" max="1" name="ow" value="0">
+        </div> -->
+            <br>
+            <br>
+
+            <input type='file' name="file" id="imgInp" />
+            <img id="blah" src="#" alt="" />
+            <input id="file" type="submit" value="start dreaming">
+
+        </form>
+        <div>
         </div>
-        <div></div>
-        <br>GIF/MP4 only (for now):
-        <input type='file' name="file" id="imgInp" />
-        <img id="blah" src="#" alt="" />
-        <input id="file" type="submit" value="start dreaming">
-
-    </form>
-    <div>
+        <div id="hidden_div" style="display:none">
+            <h1>File system page is loading, hang on a sec....:) </h1>
+        </div>
     </div>
-    <div id="hidden_div" style="display:none">
-        <h1>File system page is loading, hang on a sec....:) </h1>
-    </div>
-</div>
 
+    <script>
+        document.getElementById('file').onchange = function () {
+            $('dir').attr("value", ('Selected file: ' + this.value));
+        };
+
+    </script> {{range $i, $a := .gifs}}
+    <video class="thevideo" width="320" height="240" controls muted loop>
+        <source src="{{$a}}" type="video/mp4">
+    </video>
+    {{end}}
+    <!-- <script src="./public/css/style.css"></script> -->
+    <!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
 <script>
-    document.getElementById('file').onchange = function () {
-        $('dir').attr("value", ('Selected file: ' + this.value));
-    };
-
-</script> {{range $i, $a := .gifs}}
-<video class="thevideo" width="320" height="240" controls muted loop>
-    <source src="{{$a}}" type="video/mp4">
-</video>
-{{end}}
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
-<form id="form1" runat="server">
-
-</form>
+//     $('#myForm').submit(function(e){
+//     e.preventDefault();
+//     $.ajax({
+//         url:'/g',
+//         type:'post',
+//         data:$('#myForm').serialize(),
+//         success:function(){
+//             //whatever you wanna do after the form is successfully submitted
+//         }
+//     });
+// });
+<!-- </script> -->
 <script>
     console.log("i'm logging")
     select = document.getElementById("sel")
     select[Math.floor(Math.random() * select.length)].selected = true
-    it = document.getElementById("it")
-
-    //   read the file path
-    function readURL(input) {
-
-        if (input.files && input.files[0]) {
-            var reader = new FileReader();
-
-            reader.onload = function (e) {
-                $('#blah').attr('src', e.target.result);
-
-            }
-
-            reader.readAsDataURL(input.files[0]);
-        }
-    }
-
-    $("#imgInp").change(function () {
-        readURL(this);
-    });
 </script>
 <footer>
     <div>
         <a href="about">about</a>
     </div>
 </footer>
+
+<!-- 
+<label class="wrapper" for="states">This label is stacked above the select</label>
+<div class="button dropdown"> 
+  <select id="colorselector">
+     <option value="red">Red</option>
+     <option value="yellow">Yellow</option>
+     <option value="blue">Blue</option>
+  </select>
+</div>
+
+<div class="output">
+  <div id="red" class="colors red">  “Good artists copy, great artists steal” Pablo Picasso</div>
+  <div id="yellow" class="colors yellow"> “Art is the lie that enables us to realize the truth” Pablo Picasso</div>
+  <div id="blue" class="colors blue"> “If I don't have red, I use blue” Pablo Picasso</div>
+</div>
+<footer>
+<small> -->
+
+    <script>
+    $(function() {
+  $('#colorselector').change(function(){
+    $('.colors').hide();
+    $('#' + $(this).val()).show();
+  });
+});
+// [forked from](http://jsfiddle.net/FvMYz/)
+// [show-hide-based-on-select-option-jquery)(http://stackoverflow.com/questions/2975521/show-hide-div-based-on-select-option-jquery/2975565#2975565)
+</script>
+
+
+-->
+<!-- <script type="text/javascript">
+    if(localStorage.openpages){
+        alert('You have opened this already in a tab!');
+    }else{
+        localStorage.openpages = "1";
+        window.onbeforeunload = function () {
+            localStorage.openpages = "";
+        };
+    }   
+</script> -->
+
+
+</body>
 
 </html>

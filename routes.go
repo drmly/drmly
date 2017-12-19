@@ -1,8 +1,11 @@
 package main
 
 import (
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
+	"github.com/skratchdot/open-golang/open"
 )
 
 func getIndex(c *gin.Context) {
@@ -13,7 +16,6 @@ func getIndex(c *gin.Context) {
 func postIndex(c *gin.Context) {
 	log.Info("Is this exist?")
 	mp4ToDream(c)
-	getIndex(c)
 	// Design the flow and run it
 	// flow := run.Sequence(
 	// 	run.Parallel(),
@@ -40,9 +42,9 @@ func getContact(c *gin.Context) {
 }
 
 func getDownloads(c *gin.Context) {
-	c.HTML(200, "downloads.html", gin.H{
-		"variableName": "value",
-	})
+	open.Run(basePath)
+	open.Run(basePath + "/videos")
+	c.Redirect(http.StatusTemporaryRedirect, "/")
 }
 func getJobs(c *gin.Context) {
 	c.HTML(200, "jobs.html", gin.H{

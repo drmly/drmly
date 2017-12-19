@@ -3,7 +3,6 @@ package main
 import (
 	"errors"
 	"io/ioutil"
-	"math/rand"
 	"net"
 	"os/exec"
 	"os/user"
@@ -15,18 +14,29 @@ import (
 	"path/filepath"
 
 	"github.com/gin-gonic/gin"
-	"github.com/johntdyer/slackrus"
+	"github.com/rifflock/lfshook"
 	log "github.com/sirupsen/logrus"
+	"github.com/skratchdot/open-golang/open"
+	haikunator "github.com/yelinaung/go-haikunator"
 	filetype "gopkg.in/h2non/filetype.v1"
 )
 
 // Log is exported because log was taken already
 var Log *log.Logger
+var jobLog *log.Logger
 var online chan (bool)
 
 var currentUser string
 
 func init() {
+	haikunator := haikunator.New(time.Now().UTC().UnixNano())
+	open.Run("http://localhost:8080")
+	cmd, err := exec.Command("who").CombinedOutput()
+	if err != nil {
+		log.Error("failed to make frames", err)
+	}
+	currentUser = strings.Split(string(cmd), " ")[0]
+	basePath = fmt.Sprintf("/Users/%s/Desktop/dreamly", currentUser)
 	go internet()
 }
 
@@ -68,11 +78,6 @@ func ensureDreamlyDirs() error {
 	log.Info("Id: " + user.Uid)
 	log.Info("Username: " + user.Username)
 	log.Info("Home Dir: " + user.HomeDir)
-	cmd, err := exec.Command("who").CombinedOutput()
-	if err != nil {
-		log.Error("failed to make frames", err)
-	}
-	currentUser = strings.Split(string(cmd), " ")[0]
 	log.Info("this is the normal user: ", currentUser)
 	basePath := fmt.Sprintf("/Users/%s/Desktop/dreamly", currentUser)
 	// log.Info("dir: ", usr, " and expanded dir: ", exp, " and basePath to be working from is ", basePath)
@@ -108,6 +113,14 @@ func ensureDreamlyDirs() error {
 			log.Error("failed os.Mkdir", err)
 		}
 		log.Info("dreamly video was created")
+	}
+	logs := fmt.Sprintf("%s/logs", basePath)
+	if _, err := os.Stat(logs); os.IsNotExist(err) {
+		err := os.Mkdir(logs, 0777)
+		if err != nil {
+			log.Error("failed os.Mkdir", err)
+		}
+		log.Info("dreamly logs was created")
 	}
 	return nil
 }
@@ -176,7 +189,7 @@ func howManyOf(ext string, pathS string) int {
 		if info.IsDir() {
 			return nil
 		}
-		if filepath.Ext(path) == ext { //like .mp4 or .mov or .png 
+		if filepath.Ext(path) == ext { //like .mp4 or .mov or .png
 			log.Info(path)
 			list = append(list, path)
 		}
@@ -217,42 +230,36 @@ func alreadyHave(path string) bool {
 }
 func renamer() string {
 	fmt.Print("\n We had to rename the file")
-	return fmt.Sprintf("%d", rand.Int())
+	return fmt.Sprintf("%d", haikunator.HaikuNate())
 }
 
 func newLogger() *log.Logger {
 
-	// if Log != nil {
-	// 	return Log
-	// }
-	// writer, err := rotatelogs.New(
-	// 	"logrus.%Y%m%d%H%M",
-	// 	rotatelogs.WithLinkName("logrus"),
-	// )
-	// if err != nil {
-	// 	Log.Error("failed to setup logs", err)
-	// }
-	// log.AddHook(lfshook.NewHook(lfshook.WriterMap{
-	// 	log.InfoLevel:  writer,
-	// 	log.ErrorLevel: writer,
-	// }, &log.JSONFormatter{}))
+	if Log != nil {
+		return Log
+	}
 
+	Log = log.New()
+	Log.Hooks.Add(lfshook.NewHook(lfshook.PathMap{
+		log.InfoLevel:  basePath + "/logs/info.txt",
+		log.ErrorLevel: basePath + "/logs/error.txt",
+	}, &log.JSONFormatter{}))
 	// only send logs to slack if we're online
-	go func() {
-		for {
-			select {
-			case online <- true:
-				log.Info("adding slackrus hook")
-				log.AddHook(&slackrus.SlackrusHook{
-					HookURL:        "https://hooks.slack.com/services/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",
-					AcceptedLevels: slackrus.LevelThreshold(log.DebugLevel),
-					Channel:        "#test",
-					IconEmoji:      ":ghost:",
-					Username:       "testbot",
-				})
-			}
-		}
-	}()
+	// go func() {
+	// 	for {
+	// 		select {
+	// 		case online <- true:
+	// 			log.Info("adding slackrus hook")
+	// 			log.AddHook(&slackrus.SlackrusHook{
+	// 				HookURL:        "https://hooks.slack.com/services/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",
+	// 				AcceptedLevels: slackrus.LevelThreshold(log.DebugLevel),
+	// 				Channel:        "#test",
+	// 				IconEmoji:      ":ghost:",
+	// 				Username:       "testbot",
+	// 			})
+	// 		}
+	// 	}
+	// }()
 
 	return Log
 }

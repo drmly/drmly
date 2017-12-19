@@ -102,23 +102,22 @@ def deep_dream(model, output_path, input_image=noise):
     file_list =sorted(glob.iglob(args.input +'/*.png'), key=numericalSort)
     for image_file in file_list:
         if str(args.randomlayer == "noconv"):
-            layer=random.choice(no_conv)
+            # layer=random.choice(no_conv)
             print("layer is noconv" , layer)
-        elif str(args.randomlayer) != "Default":
-            layer=random.choice(layer_names)
+        elif str(args.randomlayer) == "random":
+            # layer=random.choice(layer_names)
             print("layer is rl " , layer)
         # L2 and gradient
         loss = tf.reduce_mean(tf.square(graph.get_tensor_by_name("import/%s:0" % layer)))
         gradient = tf.gradients(loss, X)[0]
-        if int(args.linear) > 0 and iter_num < 90: #increase iterations this run if doing linear increase
+        if int(args.linear) > 0 and iter_num < 50: #increase iterations this run if doing linear increase
             iter_num += int(args.linear)
             print("increase iter_num to ", iter_num)
         iw = int(args.itwaver)
-        # ow = int(args.ocwaver)
         r = bool(random.getrandbits(1))
         if iw > 0:
             if iter_num > iw:
-                if r and iter_num < 90:
+                if r and iter_num < 50:
                         iter_num += iw
                 else:
                     iter_num -= iw
@@ -126,6 +125,7 @@ def deep_dream(model, output_path, input_image=noise):
                 if not r:
                     iter_num += iw
         
+        # ow = int(args.ocwaver)
         # r = bool(random.getrandbits(1))
         # if ow > 0:
         #     if octave_num > ow:

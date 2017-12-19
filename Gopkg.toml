@@ -74,3 +74,8 @@
   branch = "master"
 
 
+[[constraint]]
+  name =  "github.com/yelinaung/go-haikunator"
+  branch = "master"
+
+

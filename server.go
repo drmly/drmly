@@ -4,6 +4,7 @@ import (
 	"math/rand"
 
 	log "github.com/sirupsen/logrus"
+	"github.com/skratchdot/open-golang/open"
 
 	"time"
 
@@ -58,13 +59,17 @@ func InitializeServer(host string) (server *network.WebServer) {
 
 	r.GET("/", getIndex)
 	r.POST("/g", postIndex)
-	r.GET("/g", getAbout)
+	r.GET("/g", getIndex)
 	r.GET("/downloads", getDownloads)
 	r.GET("/about", getAbout)
 	r.GET("/contact", getContact)
 	r.GET("/jobs", getJobs)
 	r.GET("/code", getCode)
 	r.GET("/donate", getDonate)
+	r.GET("/frames", func(c *gin.Context) {
+		open.Run(basePath + "/frames")
+	})
+	
 
 	return network.InitializeWebServer(r, host)
 }

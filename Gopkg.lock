@@ -26,18 +26,6 @@
   revision = "1e59b77b52bf8e4b449a57e6f79f21226d571845"
 
 [[projects]]
-  branch = "master"
-  name = "github.com/johntdyer/slack-go"
-  packages = ["."]
-  revision = "88ef3038545fa084d81f36e4a6943d112cdd74f6"
-
-[[projects]]
-  branch = "master"
-  name = "github.com/johntdyer/slackrus"
-  packages = ["."]
-  revision = "3992f319fd0ac349483279ef74742cd787841cba"
-
-[[projects]]
   name = "github.com/json-iterator/go"
   packages = ["."]
   revision = "f7279a603edee96fe7764d3de9c6ff8cf9970994"
@@ -50,10 +38,10 @@
   version = "v0.0.3"
 
 [[projects]]
-  branch = "master"
-  name = "github.com/mitchellh/go-homedir"
+  name = "github.com/rifflock/lfshook"
   packages = ["."]
-  revision = "b8bc1bf767474819792c23f32d8286a45736f1c6"
+  revision = "1e6869029fcba52a12e98696e95dc1f0fb33702f"
+  version = "v2.1"
 
 [[projects]]
   name = "github.com/sirupsen/logrus"
@@ -78,6 +66,12 @@
   name = "github.com/ugorji/go"
   packages = ["codec"]
   revision = "0e0d6e869525973a9b36093f6ddc9d91b9fc2d71"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/yelinaung/go-haikunator"
+  packages = ["."]
+  revision = "1249cae259af64421ef73d21aa054597757e61fe"
 
 [[projects]]
   branch = "master"
@@ -112,6 +106,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "1c04fb9e59c0a7236ed6fac3a6c7c514ed5074d9ad44611372c0d7a1bc79eb22"
+  inputs-digest = "889648cefa82e4d6991994f4b3dd3b6dd636068b78acee0516e70bb5a3416bba"
   solver-name = "gps-cdcl"
   solver-version = 1

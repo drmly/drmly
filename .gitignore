@@ -1,3 +1,4 @@
+.gitignore
 .ssh
 deepgif/*
 frames/*
@@ -29,3 +30,6 @@ ffprobe
 dist/*
 folder
 bind
+todo.txt
+neural-style/**
+fast-style-transfer
