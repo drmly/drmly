@@ -101,6 +101,7 @@ def deep_dream(model, output_path, input_image=noise):
     # count = len(output_list) + 1
     file_list =sorted(glob.iglob(args.input +'/*.png'), key=numericalSort)
     for image_file in file_list:
+        print("what is args.randomlayer: "+  str(args.randomlayer))
         if str(args.randomlayer == "noconv"):
             # layer=random.choice(no_conv)
             print("layer is noconv" , layer)

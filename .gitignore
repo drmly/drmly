@@ -33,3 +33,5 @@ bind
 todo.txt
 neural-style/**
 fast-style-transfer
+.DS_Store
+.DS_Store?

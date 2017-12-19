@@ -75,7 +75,7 @@
 
 
 [[constraint]]
-  name =  "github.com/yelinaung/go-haikunator"
+  name =  "github.com/dreamlyteam/go-haikunator"
   branch = "master"
 
 

@@ -17,7 +17,7 @@ import (
 	"github.com/rifflock/lfshook"
 	log "github.com/sirupsen/logrus"
 	"github.com/skratchdot/open-golang/open"
-	haikunator "github.com/yelinaung/go-haikunator"
+	"github.com/yelinaung/go-haikunator"
 	filetype "gopkg.in/h2non/filetype.v1"
 )
 
@@ -26,10 +26,10 @@ var Log *log.Logger
 var jobLog *log.Logger
 var online chan (bool)
 
+
 var currentUser string
 
 func init() {
-	haikunator := haikunator.New(time.Now().UTC().UnixNano())
 	open.Run("http://localhost:8080")
 	cmd, err := exec.Command("who").CombinedOutput()
 	if err != nil {
@@ -132,9 +132,9 @@ func saveFile(c *gin.Context) (string, string, error) {
 		log.Info("failed to get file", err)
 	}
 	name := strings.Split(file.Filename, ".")[0]
-	path := fmt.Sprintf("$HOME/Desktop/%s", name)
+	path := fmt.Sprintf("%s/frames/%s",basePath, name)
 	if alreadyHave(path) {
-		name = renamer()
+		name = renamer(name)
 		path = fmt.Sprintf("$HOME/Desktop/%s", name)
 		log.Info("\nwe renamed as: ", name)
 	}
@@ -228,9 +228,10 @@ func alreadyHave(path string) bool {
 	}
 	return true
 }
-func renamer() string {
+func renamer(n string) string {
 	fmt.Print("\n We had to rename the file")
-	return fmt.Sprintf("%d", haikunator.HaikuNate())
+	h:=haikunator.New(time.Now().UTC().UnixNano())
+	return fmt.Sprintf("%s%s",n, h.Haikunate())
 }
 
 func newLogger() *log.Logger {
@@ -263,3 +264,4 @@ func newLogger() *log.Logger {
 
 	return Log
 }
+

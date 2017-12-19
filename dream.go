@@ -1,8 +1,9 @@
 package main
 
 import (
-	"net/http"
+	"bytes"
 	"fmt"
+	"net/http"
 	"os"
 	"os/exec"
 	"strings"
@@ -20,25 +21,18 @@ var basePath string
 
 func mp4ToDream(c *gin.Context) {
 	if isJob {
-		c.String(200, "a job already running, wait til it's finished") //todo implement a queue here instead
-		return
-	} else {
-		c.String(200, "righteous! a new job started")
-		isJob = true
 		log.WithFields(log.Fields{
 			"job": "mp42dream",
-		}).Info("started a a deep dream job")
+		}).Info("was denied a new job, job already running")
+		c.String(200, "a job already running, wait til it's finished") //todo implement a queue here instead
+		return
 	}
+	c.String(200, "righteous! a new job started")
+	isJob = true
+	log.WithFields(log.Fields{
+		"job": "mp42dream",
+	}).Info("started a a deep dream job")
 
-	// usr, err := homedir.Dir()
-	// if err != nil {
-	// 	log.Error("failed to get homedir", err)
-	// }
-	// exp, err := homedir.Expand(usr)
-	// if err != nil {
-	// 	log.Error("failed to get expanded homedir", err)
-	// }
-	// get the file
 	file, err := c.FormFile("file")
 	if err != nil {
 		log.Info("failed to get file", err)
@@ -48,8 +42,8 @@ func mp4ToDream(c *gin.Context) {
 	fullName := file.Filename
 
 	log.Info("base path is ", basePath)
-	if alreadyHave(basePath+"/frames/"+name) {
-		name = renamer()
+	if alreadyHave(basePath + "/frames/" + name) {
+		name = renamer(name)
 		fullName = name + "." + strings.Split(file.Filename, ".")[1]
 		log.Info("\nwe renamed as: ", fullName)
 	}
@@ -87,24 +81,44 @@ func mp4ToDream(c *gin.Context) {
 		log.Error("failed to save file at path ", savedFilePath, " err is: ", err)
 	}
 	log.Info("saved file at path ", savedFilePath)
-	// if file not mp4 try to make it mp4
+
+	// if gif make it an mp4
 	ext := strings.Split(file.Filename, ".")[1]
-	log.Info("ext: ", ext)
-	log.Info("file.filename ", file.Filename)
-	if ext != "mp4" {
-		cmd, err := exec.Command("ffmpeg", "-i", savedFilePath, strings.Split(savedFilePath, ".")[0]+".mp4").CombinedOutput()
+	if ext == "gif" {
+		log.Info("trying to convert a gif")
+		// ffmpeg -f gif -i giphy-downsized.gif  -pix_fmt yuv420p -c:v libx264 -movflags +faststart -filter:v crop='floor(in_w/2)*2:floor(in_h/2)*2' BAR.mp4
+		savedMp4 := fmt.Sprintf("%s/frames/%s/%s.mp4", basePath, name, name)
+		cmd := exec.Command("ffmpeg", "-f", "gif", "-i", savedFilePath, "-pix_fmt", "yuv420p", "-c:v", "libx264", "-movflags", "+faststart", "-filter:v", "crop='floor(in_w/2)*2:floor(in_h/2)*2'", savedMp4)
+		cmd.Stdin = strings.NewReader("")
+		var out bytes.Buffer
+		cmd.Stdout = &out
+		err = cmd.Run()
 		if err != nil {
-			log.Error("failed to make an .any to .mp4 , ", err)
+			log.Error("failed to make mp4 from gif ", err)
 		} else {
-			log.Info("made a ", ext, " into .mp4 with cmd ", string(cmd))
-			err := os.Remove(savedFilePath)
-			if err != nil {
-				log.Info("err removing original .mp4 as err: ", err)
-				c.String(200, "failed with file extension ", ext, " \n try again with better supported file, like mp4")
-				return
-			}
 			savedFilePath = strings.Split(savedFilePath, ".")[0] + ".mp4"
-			log.Info("deleted original at ext: ", ext)
+			log.Info("made mp4 from GIF")
+		}
+	} else {
+		// if file not gif or mp4 try to make it mp4
+		log.Info("ext: ", ext)
+		log.Info("file.filename ", file.Filename)
+		if ext != "mp4" {
+			cmd, err := exec.Command("ffmpeg", "-i", savedFilePath, strings.Split(savedFilePath, ".")[0]+".mp4").CombinedOutput()
+			if err != nil {
+				log.Error("failed to make a .any to .mp4 , ", err)
+			} else {
+				log.Info("made a ", ext, " into .mp4 with cmd ", string(cmd))
+				err := os.Remove(savedFilePath)
+				if err != nil {
+					log.Info("err removing original .mp4 as err: ", err)
+					c.String(200, "failed with file extension ", ext, " \n try again with better supported file, like mp4")
+					return
+				} else {
+					savedFilePath = strings.Split(savedFilePath, ".")[0] + ".mp4"
+					log.Info("deleted original at ext: ", ext)
+				}
+			}
 		}
 	}
 	// open finder
@@ -139,32 +153,31 @@ func mp4ToDream(c *gin.Context) {
 	cmd, err = exec.Command("python3", "folder.py", "--input", framesDirPath, "-it", it, "-oc", oc, "-la", la, "-rl", rl, "-li", li, "-iw", iw, "-ow", ow).CombinedOutput()
 	if err != nil {
 		log.WithFields(log.Fields{
-			"event": "dream",
+			"event": "folder.py",
 		}).Error("failed to dream", err)
-		c.String(200, "Abort, this app is crashing, can't dream, probs the platform ur using is not OSX Sierra or youre not starting the app from terminal")
+		c.String(200, "Abort, this app is crashing, can't dream")
 	}
 	log.Info("done w/ dream loop, python said: ", string(cmd))
 
 	// put frames together into an mp4 in videos dir
 	newVideo := fmt.Sprintf("%s/videos/%s", basePath, name+".mp4")
-	pathOk := func(p string) error {
-		if _, err := os.Stat(p); err != nil {
-			return nil
-		} else {
-			p = fmt.Sprintf("%s/%s.%s", basePath, renamer(), strings.Split(file.Filename, ".")[1])
-			log.Info("new video to be made already in vidoe dir, renamed to :", p)
-			return err
-		}
-	}
-	for {
-		err = pathOk(newVideo)
-		if err != nil {
-			pathOk(newVideo)
-		} else {
-			log.Info("new video to be made at ", newVideo)
-			break
-		}
-	}
+	// pathOk := func(p string) error {
+	// 	if _, err := os.Stat(p); err != nil {
+	// 		return nil
+	// 	}
+	// 	p = fmt.Sprintf("%s/%s.%s", basePath, renamer(name), strings.Split(file.Filename, ".")[1])
+	// 	log.Info("new video to be made already in vidoe dir, renamed to :", p)
+	// 	return err
+	// }
+	// for {
+	// 	err = pathOk(newVideo)
+	// 	if err != nil {
+	// 		pathOk(newVideo)
+	// 	} else {
+	// 		log.Info("new video to be made at ", newVideo)
+	// 		break
+	// 	}
+	// }
 
 	frames := fmt.Sprintf("%s/output/%s.png", framesDirPath, "%d")
 	log.Info("frames to be turned into mp4 at: ", frames)
@@ -206,6 +219,6 @@ func mp4ToDream(c *gin.Context) {
 		}
 		log.Info("there's no sound")
 	}
-	c.Redirect(http.StatusTemporaryRedirect, "/")
+	c.Redirect(http.StatusTemporaryRedirect, "/g")
 	isJob = false
 }
