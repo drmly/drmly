@@ -1,3 +1,3 @@
 package main
 
-var jobs, maxJobs int
+var maxJobs int

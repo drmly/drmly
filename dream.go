@@ -3,7 +3,6 @@ package main
 import (
 	"bytes"
 	"fmt"
-	"net/http"
 	"os"
 	"os/exec"
 	"strings"
@@ -20,7 +19,10 @@ var isJob bool
 var basePath string
 
 func dream(c *gin.Context) {
-	c.String(200, "righteous! a new job started\n")
+	ov := c.PostForm("ov")
+	ovf := c.PostForm("ovf")
+	of := c.PostForm("of")
+	oo := c.PostForm("oo")
 	isJob = true
 	defer func() {
 		isJob = false
@@ -32,7 +34,6 @@ func dream(c *gin.Context) {
 	file, err := c.FormFile("file")
 	if err != nil {
 		log.Info("failed to get file", err)
-		c.String(200, "no file added huh? ", err)
 	}
 	name := strings.Split(file.Filename, ".")[0]
 	fullName := file.Filename
@@ -43,16 +44,6 @@ func dream(c *gin.Context) {
 		fullName = name + "." + strings.Split(file.Filename, ".")[1]
 		log.Info("\nwe renamed as: ", fullName)
 	}
-
-	// write out the job metadata for the user
-	// logFile, err := os.OpenFile(basePath+"/logs/"+name+".txt", os.O_CREATE|os.O_WRONLY, 0666)
-	// if err == nil {
-	// 	jobLog.Out = logFile
-	// } else {
-	// 	// log.WithFields(log.Fields{
-	// 	// 	"dream": "Failed to log to file, using default stderr",
-	// 	// }).Error(err)
-	// }
 
 	// make new folder for job
 	framesDirPath := fmt.Sprintf("%s/frames/%s", basePath, name)
@@ -75,8 +66,9 @@ func dream(c *gin.Context) {
 	savedFilePath := fmt.Sprintf("%s/%s", framesDirPath, fullName)
 	if err := c.SaveUploadedFile(file, savedFilePath); err != nil {
 		log.Error("failed to save file at path ", savedFilePath, " err is: ", err)
+	} else {
+		log.Info("saved file at path ", savedFilePath)
 	}
-	log.Info("saved file at path ", savedFilePath)
 
 	// if gif make it an mp4
 	ext := strings.Split(file.Filename, ".")[1]
@@ -108,7 +100,6 @@ func dream(c *gin.Context) {
 				err := os.Remove(savedFilePath)
 				if err != nil {
 					log.Info("err removing original .mp4 as err: ", err)
-					c.String(200, "failed with file extension ", ext, " \n try again with better supported file, like mp4")
 					return
 				} else {
 					savedFilePath = strings.Split(savedFilePath, ".")[0] + ".mp4"
@@ -118,10 +109,10 @@ func dream(c *gin.Context) {
 		}
 	}
 	// open finder
-	if c.PostForm("of") == "of" {
+	if of == "of" {
 		open.Run(framesDirPath)
 	}
-	if c.PostForm("oo") == "oo" {
+	if oo == "oo" {
 		open.Run(outputPath)
 	}
 
@@ -145,8 +136,15 @@ func dream(c *gin.Context) {
 	ow := c.PostForm("ow")
 	li := c.PostForm("li")
 	iw := c.PostForm("iw")
+	rle := c.PostForm("rle")
+
 	log.Info("fruckkkk")
-	cmd, err = exec.Command("python3", "folder.py", "--input", framesDirPath, "-it", it, "-oc", oc, "-la", la, "-rl", rl, "-li", li, "-iw", iw, "-ow", ow).CombinedOutput()
+
+	c.HTML(200, "jobs.html", gin.H{
+		"jobs": "some jobs",
+	})
+	go func() {
+	cmd, err = exec.Command("python3", "folder.py", "--input", framesDirPath, "-it", it, "-oc", oc, "-la", la, "-rl", rl, "-rle", rle, "-li", li, "-iw", iw, "-ow", ow).CombinedOutput()
 	if err != nil {
 		log.WithFields(log.Fields{
 			"event": "folder.py",
@@ -186,7 +184,7 @@ func dream(c *gin.Context) {
 		log.Info("\nmade mp4 from frames")
 	}
 
-	if c.PostForm("ov") == "ov" {
+	if ov == "ov" {
 		open.Run(basePath + "/videos")
 	}
 
@@ -204,16 +202,16 @@ func dream(c *gin.Context) {
 			log.Error("failed to add sound back", err)
 		} else {
 			log.Info("fffmpeg added sound:", string(out))
-			if c.PostForm("ovf") == "ovf" {
+			if ovf == "ovf" {
 				open.Run(basePath + "/videos/audio_" + name + ".mp4")
 			}
 			// todo remove newVideo, so we only save one w/ audio
 		}
 	} else {
-		if c.PostForm("ovf") == "ovf" {
-			open.Run(newVideo)
-		}
 		log.Info("there's no sound")
 	}
-	c.Redirect(http.StatusTemporaryRedirect, "/g")
+	if ovf == "ovf" {
+		open.Run(newVideo)
+	}
+}()
 }

@@ -7,6 +7,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/skratchdot/open-golang/open"
 )
+var done chan(struct{})
 
 func getIndex(c *gin.Context) {
 	c.HTML(200, "index.html", gin.H{
@@ -16,26 +17,17 @@ func getIndex(c *gin.Context) {
 func postIndex(c *gin.Context) {
 	log.Info("Is this exist?")
 	if isJob {
+		jobs := "one"
 		log.WithFields(log.Fields{
 			"job": "mp42dream",
-		}).Info("was denied a new job, job already running")
-		c.String(200, "a job already running, wait til it's finished") //todo implement a queue here instead
-		return
+		}).Info("added new job to queue")
+		c.HTML(200, "jobs.html", gin.H{
+			jobs: jobs,
+		})
 	} else {
 		dream(c)
+		c.HTML(200, "jobs.html", gin.H{})
 	}
-	// Design the flow and run it
-	// flow := run.Sequence(
-	// 	run.Parallel(),
-
-	// )
-
-	// ctx := floc.NewContext()
-
-	// ctrl := floc.NewControl(ctx)
-
-	// floc.RunWith(ctx, ctrl, flow)
-
 }
 func getAbout(c *gin.Context) {
 	c.HTML(200, "about.html", gin.H{
@@ -56,7 +48,8 @@ func getDownloads(c *gin.Context) {
 }
 func getJobs(c *gin.Context) {
 	c.HTML(200, "jobs.html", gin.H{
-		"variableName": "value",
+		"jobs": "the job you just made is awesome!",
+		"est": "should be done in ten zetaseconds",
 	})
 }
 func getCode(c *gin.Context) {

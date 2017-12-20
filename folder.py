@@ -1,19 +1,18 @@
 # coding: UTF-8
-'''''''''''''''''''''''''''''''''''''''''''''''''''''
-    file name: main.py
-    create time: 2017年09月01日 星期五 13时48分54秒
-    author: Jipeng Huang
-    e-mail: huangjipengnju@gmail.com
-    github: https://github.com/hjptriplebee
-'''''''''''''''''''''''''''''''''''''''''''''''''''''
-# based on tensorflow/example/tutorials deepdream
-import os
-#export pbr version for tensorflow user
-os.environ["PBR_VERSION"]='3.1.1'
 
+#some ideas and code taken  from : https://github.com/hjptriplebee huangjipengnju@gmail.com
+
+# also based on tensorflow/example/tutorials deepdream
+# and minor tweaks done for bind by dreamlyteam@gmail.com
+
+
+import os
 import argparse
 import tensorflow as tf
 import numpy as np
+#export pbr version for tensorflow user
+os.environ["PBR_VERSION"]='3.1.1'
+
 import cv2
 import random
 import re
@@ -43,6 +42,7 @@ layer_names = ['conv2d0', 'conv2d1', 'conv2d2',
 no_conv = [ 'mixed3a', 'mixed3b',
                    'mixed4a', 'mixed4b', 'mixed4c', 'mixed4d', 'mixed4e',
                    'mixed5a', 'mixed5b']
+layer_conv = [ 'conv2d0', 'conv2d1', 'conv2d2']
 
 def define_args():
     """define args"""
@@ -54,6 +54,7 @@ def define_args():
     parser.add_argument("-oc", "--octaves", help="specify octaves", default="2")
     parser.add_argument("-la", "--layer", help="specify layer name", default="mixed4c")
     parser.add_argument("-rl", "--randomlayer", help="specify random layer", default="Default")
+    parser.add_argument("-rle", "--randomlayerevery", help="specify random layer every n frames", default="")
     parser.add_argument("-iw", "--itwaver", help="randomize the number of iterations up and down by this amount", default="0")
     parser.add_argument("-ow", "--ocwaver", help="randomize the number of octaves up and down by this amount", default="0")
     return parser.parse_args()
@@ -96,21 +97,28 @@ def deep_dream(model, output_path, input_image=noise):
     print("\n",iter_num,"\n")
 
     count = 1
-    #output_list is list of already completed frames if jobs previously started
-    # output_list = sorted(glo1b.iglob(args.input+'/output/*.png'), key=numericalSort)
-    # count = len(output_list) + 1
+    output_count = len([name for name in os.listdir('.') if os.path.isfile(args.input+'/output')])
+    count = output_count + 1
     rl = str(args.randomlayer)
+    rle = int(args.randomlayerevery)
+    print("what is args.randomlayer: "+ rl, "done every " ,str(rle), "frames")
     file_list =sorted(glob.iglob(args.input +'/*.png'), key=numericalSort)
     for image_file in file_list:
-        print("what is args.randomlayer: "+ rl)
-        if  "noconv" in rl:
-            # layer=random.choice(no_conv)
-            print("layer is noconv" , layer)
-        elif "random" in rl:
-            # layer=random.choice(layer_names)
-            print("layer is rl " , layer)
-        elif rl == "Default":
-            print("default layer")
+        if count < output_count: #hack to finish a partially completed job
+            count+=1
+            continue
+        if rle != 0 and rle % len(image_file):
+            print("random layer in ", str(rl), " frames")
+            if  "nc" in rl:
+                layer=random.choice(no_conv)
+                print("layer is noconv" , layer)
+            elif "random" in rl:
+                layer=random.choice(layer_names)
+                print("layer is rl " , layer)
+            elif "c" in rl:
+                layer=random.choice(layer_conv)
+                print("random layer choice is " , layer)
+
         # L2 and gradient
         loss = tf.reduce_mean(tf.square(graph.get_tensor_by_name("import/%s:0" % layer)))
         gradient = tf.gradients(loss, X)[0]
@@ -122,13 +130,12 @@ def deep_dream(model, output_path, input_image=noise):
         if iw > 0:
             if iter_num > iw:
                 if r and iter_num < 50:
-                        iter_num += iw
+                    iter_num += iw
                 else:
                     iter_num -= iw
             else:
                 if not r:
-                    iter_num += iw
-        
+                    iter_num += iw    
         # ow = int(args.ocwaver)
         # r = bool(random.getrandbits(1))
         # if ow > 0:

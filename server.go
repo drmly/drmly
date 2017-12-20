@@ -16,7 +16,7 @@ func web() {
 	host := "0.0.0.0:8080"
 	server := InitializeServer(host)
 	server.Start()
-	log.Println("Gin web server started on " + host)
+	log.Info("Gin web server started on " + host)
 }
 
 // InitializeServer gets our gin running front end poppin off
@@ -27,12 +27,12 @@ func InitializeServer(host string) (server *network.WebServer) {
 	if err := ensureDreamlyDirs(); err != nil {
 		log.Error("Failed to have home working dir to put the files into at ~/Desktop/dreamly, suxx", err)
 	} else {
-		log.Info("dreamly dirs ensuered!")
+		log.Info("dreamly dirs ensured!")
 	}
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.Default()
 	r.LoadHTMLGlob("public/tmpl/*.html")
-	r.StaticFile("favicon.ico", "./favicon.ico")
+	r.StaticFile("public/favicon.ico", "./public/favicon.ico")
 
 	r.GET("/", getIndex)
 	r.POST("/g", postIndex)
