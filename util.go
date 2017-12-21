@@ -17,7 +17,7 @@ import (
 	"github.com/rifflock/lfshook"
 	log "github.com/sirupsen/logrus"
 	"github.com/skratchdot/open-golang/open"
-	"github.com/yelinaung/go-haikunator"
+	haikunator "github.com/yelinaung/go-haikunator"
 	filetype "gopkg.in/h2non/filetype.v1"
 )
 
@@ -25,7 +25,6 @@ import (
 var Log *log.Logger
 var jobLog *log.Logger
 var online chan (bool)
-
 
 var currentUser string
 
@@ -132,7 +131,7 @@ func saveFile(c *gin.Context) (string, string, error) {
 		log.Info("failed to get file", err)
 	}
 	name := strings.Split(file.Filename, ".")[0]
-	path := fmt.Sprintf("%s/frames/%s",basePath, name)
+	path := fmt.Sprintf("%s/frames/%s", basePath, name)
 	if alreadyHave(path) {
 		name = renamer(name)
 		path = fmt.Sprintf("$HOME/Desktop/%s", name)
@@ -230,8 +229,8 @@ func alreadyHave(path string) bool {
 }
 func renamer(n string) string {
 	fmt.Print("\n We had to rename the file")
-	h:=haikunator.New(time.Now().UTC().UnixNano())
-	return fmt.Sprintf("%s%s",n, h.Haikunate())
+	h := haikunator.New(time.Now().UTC().UnixNano())
+	return fmt.Sprintf("%s%s", n, h.Haikunate())
 }
 
 func newLogger() *log.Logger {
@@ -245,23 +244,6 @@ func newLogger() *log.Logger {
 		log.InfoLevel:  basePath + "/logs/info.txt",
 		log.ErrorLevel: basePath + "/logs/error.txt",
 	}, &log.JSONFormatter{}))
-	// only send logs to slack if we're online
-	// go func() {
-	// 	for {
-	// 		select {
-	// 		case online <- true:
-	// 			log.Info("adding slackrus hook")
-	// 			log.AddHook(&slackrus.SlackrusHook{
-	// 				HookURL:        "https://hooks.slack.com/services/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",
-	// 				AcceptedLevels: slackrus.LevelThreshold(log.DebugLevel),
-	// 				Channel:        "#test",
-	// 				IconEmoji:      ":ghost:",
-	// 				Username:       "testbot",
-	// 			})
-	// 		}
-	// 	}
-	// }()
 
 	return Log
 }
-

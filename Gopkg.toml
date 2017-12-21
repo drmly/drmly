@@ -69,15 +69,6 @@
 [[constraint]]
   name = "github.com/skratchdot/open-golang"
   branch = "master"
-
-
 [[constraint]]
-  name = "github.com/johntdyer/slackrus"
   branch = "master"
-
-
-[[constraint]]
-  name =  "github.com/dreamlyteam/go-haikunator"
-  branch = "master"
-
-
+  name = "github.com/yelinaung/go-haikunator"

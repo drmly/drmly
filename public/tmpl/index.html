@@ -73,7 +73,7 @@
             <!-- <input type="number" step="2" value="20" max="90"> Temporal incoherence stabilizer (how much previous frame opacity overlay) -->
             <div>
                 open frames dir
-                <input id="openafter" type="checkbox" name="of" value="of"> output dir
+                <input checked id="openafter" type="checkbox" name="of" value="of"> output dir
                 <input type="checkbox" name="oo" value="oo"> video dir
                 <input type="checkbox" name="ov" value="ov"> video file
                 <input type="checkbox" checked name="ovf" value="ovf">
@@ -130,10 +130,10 @@
             <input id="iterations" type="number" min="1" step="1" max="1000" name="iterations" value="5">
             <!-- <br><input type="checkbox" name="itr"> make iterations random every frame between 1 -20 -->
             <br>octaves:
-            <input id="octaves" type="number" step="1" max="40" name="octaves" value="1"> 
+            <input id="octaves" type="number" step="1" max="40" name="octaves" value="1">
             <!-- octave scale: <input type="text" name="dream levels"> dream scale coefficient: -->
             <div>
-                <input type='file' name="file" id="choose" />
+                <input type='file' name="file" id="choose">
                 <img id="blah" src="#" alt="" />
                 <input style="background-color: rgb(187, 142, 189)" id="start" type="submit" value="start dreaming">
             </div>
@@ -150,7 +150,8 @@
     </footer>
 
 
-    <script> //keypressing shortcuts
+    <script>
+        //keypressing shortcuts
         function keycodes() {
             alert("key press shortcuts available, going by first letter if available, second letter if not")
         }

@@ -49,7 +49,13 @@ point browser to localhost:8080
 (because we need to download the Inception model, the first time running a job python will download a 53 megabyte tensorflow_inception_graph.pb into the bind/models dir)
 
 ------------
-Want to run jobs from your cell phone?
+Supports
+------------
+
+Anything it should, videos of any extension, gifs, and images of course
+
+------------
+Want to take video on your cell phone from exotic locations and send the job to your computer at home? 
 ------------
 
 download https://ngrok.com/download  -> start it with:

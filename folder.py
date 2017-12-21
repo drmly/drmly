@@ -20,7 +20,7 @@ import glob
 
 # parameter
 model_name = "tensorflow_inception_graph.pb"
-imagenet_mean = 117.0
+imagenet_mean = 120.0
 layer = 'mixed4c'
 iter_num = 1
 octave_num = 1

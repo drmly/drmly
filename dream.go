@@ -16,10 +16,21 @@ var isJob bool
 var basePath string
 
 func dream(c *gin.Context) {
-	ov := c.PostForm("ov")
+	fps := c.PostForm("fps")
+	ov := c.PostForm("ov") //data the user uploaded we want
 	ovf := c.PostForm("ovf")
 	of := c.PostForm("of")
 	oo := c.PostForm("oo")
+	it := c.PostForm("iterations")
+	oc := c.PostForm("octaves")
+	la := c.PostForm("layer")
+	rl := c.PostForm("rl")
+	log.Info("rl: ", rl)
+	ow := c.PostForm("ow")
+	li := c.PostForm("li")
+	iw := c.PostForm("iw")
+	rle := c.PostForm("rle")
+
 	isJob = true
 	defer func() {
 		isJob = false
@@ -61,20 +72,29 @@ func dream(c *gin.Context) {
 	log.Info("saved output dir at path ", outputPath)
 
 	// save the file
-	savedFilePath := fmt.Sprintf("%s/%s", framesDirPath, fullName)
-	if err := c.SaveUploadedFile(file, savedFilePath); err != nil {
-		log.Error("failed to save file at path ", savedFilePath, " err is: ", err)
+	uploadedFile := fmt.Sprintf("%s/%s", framesDirPath, fullName)
+	if err := c.SaveUploadedFile(file, uploadedFile); err != nil {
+		log.Error("failed to save file at path ", uploadedFile, " err is: ", err)
 	} else {
-		log.Info("saved file at path ", savedFilePath)
+		log.Info("saved file at path ", uploadedFile)
 	}
 
-	// if gif make it an mp4
+	itsAVideo := false
 	ext := strings.Split(file.Filename, ".")[1]
-	if ext == "gif" {
+	// decide what to do with the file we've gotten, if it's an image:
+	if ext == "png" || ext == "jpg" || ext == "jpeg" {
+		cmd,err:=exec.Command("ffmpeg", "-i", uploadedFile, framesDirPath+"/"+name+".png").CombinedOutput()
+		if err != nil {
+			log.Error("oops, failed trying to make some image of ext ", ext, " to .png")
+		} else {
+			log.Info("that's great, we got an image, those are easy, ffmpeg said:", string(cmd))
+		}
+	} else if ext == "gif" {
+		itsAVideo = true
 		log.Info("trying to convert a gif")
 		// ffmpeg -f gif -i giphy-downsized.gif  -pix_fmt yuv420p -c:v libx264 -movflags +faststart -filter:v crop='floor(in_w/2)*2:floor(in_h/2)*2' BAR.mp4
 		savedMp4 := fmt.Sprintf("%s/frames/%s/%s.mp4", basePath, name, name)
-		cmd := exec.Command("ffmpeg", "-f", "gif", "-i", savedFilePath, "-pix_fmt", "yuv420p", "-c:v", "libx264", "-movflags", "+faststart", "-filter:v", "crop='floor(in_w/2)*2:floor(in_h/2)*2'", savedMp4)
+		cmd := exec.Command("ffmpeg", "-f", "gif", "-i", uploadedFile, "-pix_fmt", "yuv420p", "-c:v", "libx264", "-movflags", "+faststart", "-filter:v", "crop='floor(in_w/2)*2:floor(in_h/2)*2'", savedMp4)
 		cmd.Stdin = strings.NewReader("")
 		var out bytes.Buffer
 		cmd.Stdout = &out
@@ -82,25 +102,26 @@ func dream(c *gin.Context) {
 		if err != nil {
 			log.Error("failed to make mp4 from gif ", err)
 		} else {
-			savedFilePath = strings.Split(savedFilePath, ".")[0] + ".mp4"
+			uploadedFile = strings.Split(uploadedFile, ".")[0] + ".mp4"
 			log.Info("made mp4 from GIF")
 		}
 	} else {
-		// if file not gif or mp4 try to make it mp4
+		itsAVideo = true
+		// if file not gif or img try to make it mp4
 		log.Info("ext: ", ext)
 		log.Info("file.filename ", file.Filename)
 		if ext != "mp4" {
-			cmd, err := exec.Command("ffmpeg", "-i", savedFilePath, strings.Split(savedFilePath, ".")[0]+".mp4").CombinedOutput()
+			cmd, err := exec.Command("ffmpeg", "-i", uploadedFile, strings.Split(uploadedFile, ".")[0]+".mp4").CombinedOutput()
 			if err != nil {
 				log.Error("failed to make a .any to .mp4 , ", err)
 			} else {
 				log.Info("made a ", ext, " into .mp4 with cmd ", string(cmd))
-				err := os.Remove(savedFilePath)
+				err := os.Remove(uploadedFile)
 				if err != nil {
 					log.Info("err removing original .mp4 as err: ", err)
 					return
 				} else {
-					savedFilePath = strings.Split(savedFilePath, ".")[0] + ".mp4"
+					uploadedFile = strings.Split(uploadedFile, ".")[0] + ".mp4"
 					log.Info("deleted original at ext: ", ext)
 				}
 			}
@@ -113,32 +134,22 @@ func dream(c *gin.Context) {
 	if oo == "oo" {
 		open.Run(outputPath)
 	}
-
-	// create  frames from mp4
-	framesOut := fmt.Sprintf("%s/frames/%s/%s.png", basePath, name, "%d")
-	log.Info("framesOut: ", framesOut)
-	fps := c.PostForm("fps")
-	cmd, err := exec.Command("ffmpeg", "-i", savedFilePath, "-vf", "fps="+fps, "-c:v", "png", framesOut).CombinedOutput()
-	if err != nil {
-		log.Error("failed to make frames", err)
-	} else {
-		log.Info("made frames from MP4 with cmd: ", string(cmd))
+	if itsAVideo {
+		// create  frames from mp4
+		framesOut := fmt.Sprintf("%s/frames/%s/%s.png", basePath, name, "%d")
+		log.Info("framesOut: ", framesOut)
+		cmd, err := exec.Command("ffmpeg", "-i", uploadedFile, "-vf", "fps="+fps, "-c:v", "png", framesOut).CombinedOutput()
+		if err != nil {
+			log.Error("failed to make frames", err)
+		} else {
+			log.Info("made frames from MP4 with cmd: ", string(cmd))
+		}
 	}
-	// deep dream the frames
-	log.Info("inside dreamer loop")
-	it := c.PostForm("iterations")
-	oc := c.PostForm("octaves")
-	la := c.PostForm("layer")
-	rl := c.PostForm("rl")
-	log.Info("rl: ", rl)
-	ow := c.PostForm("ow")
-	li := c.PostForm("li")
-	iw := c.PostForm("iw")
-	rle := c.PostForm("rle")
 
-	log.Info("fruckkkk")
+	// deep dream the frames
 	go func() {
-		cmd, err = exec.Command("python3", "folder.py", "--input", framesDirPath, "-it", it, "-oc", oc, "-la", la, "-rl", rl, "-rle", rle, "-li", li, "-iw", iw, "-ow", ow).CombinedOutput()
+		log.Info("inside dreamer goroutine")
+		cmd, err := exec.Command("python3", "folder.py", "--input", framesDirPath, "-it", it, "-oc", oc, "-la", la, "-rl", rl, "-rle", rle, "-li", li, "-iw", iw, "-ow", ow).CombinedOutput()
 		if err != nil {
 			log.WithFields(log.Fields{
 				"event": "folder.py",
@@ -149,24 +160,6 @@ func dream(c *gin.Context) {
 
 		// put frames together into an mp4 in videos dir
 		newVideo := fmt.Sprintf("%s/videos/%s", basePath, name+".mp4")
-		// pathOk := func(p string) error {
-		// 	if _, err := os.Stat(p); err != nil {
-		// 		return nil
-		// 	}
-		// 	p = fmt.Sprintf("%s/%s.%s", basePath, renamer(name), strings.Split(file.Filename, ".")[1])
-		// 	log.Info("new video to be made already in vidoe dir, renamed to :", p)
-		// 	return err
-		// }
-		// for {
-		// 	err = pathOk(newVideo)
-		// 	if err != nil {
-		// 		pathOk(newVideo)
-		// 	} else {
-		// 		log.Info("new video to be made at ", newVideo)
-		// 		break
-		// 	}
-		// }
-
 		frames := fmt.Sprintf("%s/output/%s.png", framesDirPath, "%d")
 		log.Info("frames to be turned into mp4 at: ", frames)
 		// framesDir := fmt.Sprintf("%s/output/%s.png", framesDirPath, "%d")
@@ -183,7 +176,7 @@ func dream(c *gin.Context) {
 		}
 
 		//  is there sound?
-		audio, err := exec.Command("ffprobe", savedFilePath, "-show_streams", "-select_streams", "a", "-loglevel", "error").CombinedOutput()
+		audio, err := exec.Command("ffprobe", uploadedFile, "-show_streams", "-select_streams", "a", "-loglevel", "error").CombinedOutput()
 		if err != nil {
 			log.Error("Failed to test audio, ", err)
 		}
@@ -191,7 +184,7 @@ func dream(c *gin.Context) {
 		// ffmpeg -i 2171447000212516064.mp4 -i gold.mp4  -map 0:v -map 1:a output.mp4
 		if len(audio) > 1 {
 			log.Info("there's sound in this clip")
-			out, err := exec.Command("ffmpeg", "-y", "-i", newVideo, "-i", savedFilePath, "-map", "0:v", "-map", "1:a", basePath+"/videos/audio_"+name+".mp4").CombinedOutput()
+			out, err := exec.Command("ffmpeg", "-y", "-i", newVideo, "-i", uploadedFile, "-map", "0:v", "-map", "1:a", basePath+"/videos/audio_"+name+".mp4").CombinedOutput()
 			if err != nil {
 				log.Error("failed to add sound back", err)
 			} else {
