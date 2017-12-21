@@ -1,23 +1,23 @@
 package main
 
-//go:generate go-bindata -prefix "frontend/" -pkg main -o bindata.go frontend/...
+import (
+	"fmt"
+	"os"
 
-// func static_handler(rw http.ResponseWriter, req *http.Request) {
-// 	var path string = req.URL.Path
-// 	if path == "" {
-// 		path = "index.html"
-// 	} else if path == "downloads" {
-// 		path = "dl.html"
-// 	}
-// 	if bs, err := Asset(path); err != nil {
-// 		rw.WriteHeader(http.StatusNotFound)
-// 	} else {
-// 		var reader = bytes.NewBuffer(bs)
-// 		io.Copy(rw, reader)
-// 	}
-// }
+	"github.com/takama/daemon"
+)
 
-// func web() {
-// 	http.Handle("/d", http.StripPrefix("/", http.HandlerFunc(static_handler)))
-// 	http.ListenAndServe(":8080", nil)
-// }
+func main() {
+	srv, err := daemon.New(name, description, dependencies...)
+	if err != nil {
+		errlog.Println("Error: ", err)
+		os.Exit(1)
+	}
+	service := &Service{srv}
+	status, err := service.Manage()
+	if err != nil {
+		errlog.Println(status, "\nError: ", err)
+		os.Exit(1)
+	}
+	fmt.Println(status)
+}

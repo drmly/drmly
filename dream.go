@@ -7,12 +7,9 @@ import (
 	"os/exec"
 	"strings"
 
-	"github.com/skratchdot/open-golang/open"
-
-	log "github.com/sirupsen/logrus"
-
 	"github.com/gin-gonic/gin"
-	// https://github.com/syncthing/syncthing
+	log "github.com/sirupsen/logrus"
+	"github.com/skratchdot/open-golang/open"
 )
 
 var isJob bool
@@ -34,6 +31,7 @@ func dream(c *gin.Context) {
 	file, err := c.FormFile("file")
 	if err != nil {
 		log.Info("failed to get file", err)
+		return
 	}
 	name := strings.Split(file.Filename, ".")[0]
 	fullName := file.Filename
@@ -139,79 +137,75 @@ func dream(c *gin.Context) {
 	rle := c.PostForm("rle")
 
 	log.Info("fruckkkk")
-
-	c.HTML(200, "jobs.html", gin.H{
-		"jobs": "some jobs",
-	})
 	go func() {
-	cmd, err = exec.Command("python3", "folder.py", "--input", framesDirPath, "-it", it, "-oc", oc, "-la", la, "-rl", rl, "-rle", rle, "-li", li, "-iw", iw, "-ow", ow).CombinedOutput()
-	if err != nil {
-		log.WithFields(log.Fields{
-			"event": "folder.py",
-		}).Error("failed to dream", err)
-		c.String(200, "Abort, this app is crashing, can't dream")
-	}
-	log.Info("done w/ dream loop, python said: ", string(cmd))
-
-	// put frames together into an mp4 in videos dir
-	newVideo := fmt.Sprintf("%s/videos/%s", basePath, name+".mp4")
-	// pathOk := func(p string) error {
-	// 	if _, err := os.Stat(p); err != nil {
-	// 		return nil
-	// 	}
-	// 	p = fmt.Sprintf("%s/%s.%s", basePath, renamer(name), strings.Split(file.Filename, ".")[1])
-	// 	log.Info("new video to be made already in vidoe dir, renamed to :", p)
-	// 	return err
-	// }
-	// for {
-	// 	err = pathOk(newVideo)
-	// 	if err != nil {
-	// 		pathOk(newVideo)
-	// 	} else {
-	// 		log.Info("new video to be made at ", newVideo)
-	// 		break
-	// 	}
-	// }
-
-	frames := fmt.Sprintf("%s/output/%s.png", framesDirPath, "%d")
-	log.Info("frames to be turned into mp4 at: ", frames)
-	// framesDir := fmt.Sprintf("%s/output/%s.png", framesDirPath, "%d")
-	// ffmpeg -r 5 -f image2 -i ~/Desktop/dreamly/frames/FILENAME/output/%d.png -vcodec libx264 -crf 25 -pix_fmt yuv420p out.mp4
-	_, err = exec.Command("ffmpeg", "-r", fps, "-f", "image2", "-i", frames, "-vcodec", "libx264", "-crf", "25", "-pix_fmt", "yuv420p", newVideo).CombinedOutput()
-	if err != nil {
-		log.Error("still failing to output a video meh, ", err)
-	} else {
-		log.Info("\nmade mp4 from frames")
-	}
-
-	if ov == "ov" {
-		open.Run(basePath + "/videos")
-	}
-
-	//  is there sound?
-	audio, err := exec.Command("ffprobe", savedFilePath, "-show_streams", "-select_streams", "a", "-loglevel", "error").CombinedOutput()
-	if err != nil {
-		log.Error("Failed to test audio, ", err)
-	}
-	// add sound back in if there is any
-	// ffmpeg -i 2171447000212516064.mp4 -i gold.mp4  -map 0:v -map 1:a output.mp4
-	if len(audio) > 1 {
-		log.Info("there's sound in this clip")
-		out, err := exec.Command("ffmpeg", "-y", "-i", newVideo, "-i", savedFilePath, "-map", "0:v", "-map", "1:a", basePath+"/videos/audio_"+name+".mp4").CombinedOutput()
+		cmd, err = exec.Command("python3", "folder.py", "--input", framesDirPath, "-it", it, "-oc", oc, "-la", la, "-rl", rl, "-rle", rle, "-li", li, "-iw", iw, "-ow", ow).CombinedOutput()
 		if err != nil {
-			log.Error("failed to add sound back", err)
-		} else {
-			log.Info("fffmpeg added sound:", string(out))
-			if ovf == "ovf" {
-				open.Run(basePath + "/videos/audio_" + name + ".mp4")
-			}
-			// todo remove newVideo, so we only save one w/ audio
+			log.WithFields(log.Fields{
+				"event": "folder.py",
+			}).Error("failed to dream", err)
+			c.String(200, "Abort, this app is crashing, can't dream")
 		}
-	} else {
-		log.Info("there's no sound")
-	}
-	if ovf == "ovf" {
-		open.Run(newVideo)
-	}
-}()
+		log.Info("done w/ dream loop, python said: ", string(cmd))
+
+		// put frames together into an mp4 in videos dir
+		newVideo := fmt.Sprintf("%s/videos/%s", basePath, name+".mp4")
+		// pathOk := func(p string) error {
+		// 	if _, err := os.Stat(p); err != nil {
+		// 		return nil
+		// 	}
+		// 	p = fmt.Sprintf("%s/%s.%s", basePath, renamer(name), strings.Split(file.Filename, ".")[1])
+		// 	log.Info("new video to be made already in vidoe dir, renamed to :", p)
+		// 	return err
+		// }
+		// for {
+		// 	err = pathOk(newVideo)
+		// 	if err != nil {
+		// 		pathOk(newVideo)
+		// 	} else {
+		// 		log.Info("new video to be made at ", newVideo)
+		// 		break
+		// 	}
+		// }
+
+		frames := fmt.Sprintf("%s/output/%s.png", framesDirPath, "%d")
+		log.Info("frames to be turned into mp4 at: ", frames)
+		// framesDir := fmt.Sprintf("%s/output/%s.png", framesDirPath, "%d")
+		// ffmpeg -r 5 -f image2 -i ~/Desktop/dreamly/frames/FILENAME/output/%d.png -vcodec libx264 -crf 25 -pix_fmt yuv420p out.mp4
+		_, err = exec.Command("ffmpeg", "-r", fps, "-f", "image2", "-i", frames, "-vcodec", "libx264", "-crf", "25", "-pix_fmt", "yuv420p", newVideo).CombinedOutput()
+		if err != nil {
+			log.Error("still failing to output a video meh, ", err)
+		} else {
+			log.Info("\nmade mp4 from frames")
+		}
+
+		if ov == "ov" {
+			open.Run(basePath + "/videos")
+		}
+
+		//  is there sound?
+		audio, err := exec.Command("ffprobe", savedFilePath, "-show_streams", "-select_streams", "a", "-loglevel", "error").CombinedOutput()
+		if err != nil {
+			log.Error("Failed to test audio, ", err)
+		}
+		// add sound back in if there is any
+		// ffmpeg -i 2171447000212516064.mp4 -i gold.mp4  -map 0:v -map 1:a output.mp4
+		if len(audio) > 1 {
+			log.Info("there's sound in this clip")
+			out, err := exec.Command("ffmpeg", "-y", "-i", newVideo, "-i", savedFilePath, "-map", "0:v", "-map", "1:a", basePath+"/videos/audio_"+name+".mp4").CombinedOutput()
+			if err != nil {
+				log.Error("failed to add sound back", err)
+			} else {
+				log.Info("fffmpeg added sound:", string(out))
+				if ovf == "ovf" {
+					open.Run(basePath + "/videos/audio_" + name + ".mp4")
+				}
+				// todo remove newVideo, so we only save one w/ audio
+			}
+		} else {
+			log.Info("there's no sound")
+		}
+		if ovf == "ovf" {
+			open.Run(newVideo)
+		}
+	}()
 }

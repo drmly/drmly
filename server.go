@@ -2,12 +2,11 @@ package main
 
 import (
 	"math/rand"
-
+	"net/http"	
+	"time"
+	
 	log "github.com/sirupsen/logrus"
 	"github.com/skratchdot/open-golang/open"
-
-	"time"
-
 	"github.com/gin-gonic/gin"
 	"github.com/glibs/gin-webserver"
 )
@@ -32,21 +31,20 @@ func InitializeServer(host string) (server *network.WebServer) {
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.Default()
 	r.LoadHTMLGlob("public/tmpl/*.html")
-	r.StaticFile("public/favicon.ico", "./public/favicon.ico")
-
+	r.StaticFS("/videos", http.Dir(basePath+"/videos"))
+	r.StaticFS("/frames", http.Dir(basePath+"/frames"))
+	r.Static("/public", "./public")
 	r.GET("/", getIndex)
 	r.POST("/g", postIndex)
 	r.GET("/g", getIndex)
-	r.GET("/downloads", getDownloads)
 	r.GET("/about", getAbout)
-	r.GET("/contact", getContact)
 	r.GET("/jobs", getJobs)
 	r.GET("/code", getCode)
-	r.GET("/donate", getDonate)
-	r.GET("/frames", func(c *gin.Context) {
+	r.GET("/openframes", func(c *gin.Context) {
 		open.Run(basePath + "/frames")
 	})
-	
-
+	r.GET("/openvideos", func(c *gin.Context) {
+		open.Run(basePath + "/videos")
+	})
 	return network.InitializeWebServer(r, host)
 }

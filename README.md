@@ -17,21 +17,21 @@ Gifs made with bind: (to see vids go to http://reddit.com/r/deepdreamvideo)
 Requirements:
 -----------
 
-Tensorflow (pip install tensorflow, or for an optimized version, use a .whl for your OS)
+[Tensorflow](https://www.tensorflow.org/install/) (pip install tensorflow, or for an optimized version, use a .whl for your OS)
 possible shortcuts to get an optimized tensorflow installation: 
 some whl's for tensorflow here:
 https://github.com/lakshayg/tensorflow-build
 and more to be found at http://ci.tensorflow.org
 
-ffmpeg (brew install ffmpeg, or apt-get install ffmpeg)
+[ffmpeg](https://ffmpeg.org/download.html)
 
-ffprobe
+ffprobe (probably installed along with ffmpeg)
 
-wget
+[wget](https://www.gnu.org/software/wget/)
 
-python3 
+[python3](https://www.python.org/downloads/release/python-364/)
 
-go
+[go](https://golang.org/)
 
 
 ----------
@@ -46,6 +46,7 @@ go build
 
 point browser to localhost:8080
 
+(because we need to download the Inception model, the first time running a job python will download a 53 megabyte tensorflow_inception_graph.pb into the bind/models dir)
 
 ------------
 Want to run jobs from your cell phone?
@@ -55,7 +56,7 @@ download https://ngrok.com/download  -> start it with:
 
 ./ngrok http 8080
 
-ånd †hen your terminal will display the ngrok url to use on your cell phone, for example: http://c55d5584.ngrok.io     Type that into your phone. 
+ånd then your terminal will display the ngrok url to use on your cell phone, for example: http://c55d5584.ngrok.io     Type that into your phone. 
 
 
 ------------------

@@ -1,8 +1,0 @@
-package main
-
-
-
-
-func testMakeVideo()  {
-	
-}
