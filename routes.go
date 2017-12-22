@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/gin-gonic/gin"
-	log "github.com/sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 )
 
 func getIndex(c *gin.Context) {
@@ -14,7 +14,7 @@ func postIndex(c *gin.Context) {
 	log.Info("Is this exist?")
 	if isJob {
 		jobs := "one"
-		log.WithFields(log.Fields{
+		log.WithFields(logrus.Fields{
 			"job": "mp42dream",
 		}).Info("added new job to queue")
 		c.HTML(200, "jobs.html", gin.H{

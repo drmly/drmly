@@ -3,7 +3,6 @@ package main
 import (
 	"errors"
 	"io/ioutil"
-	"net"
 	"os/exec"
 	"os/user"
 	"strings"
@@ -14,55 +13,35 @@ import (
 	"path/filepath"
 
 	"github.com/gin-gonic/gin"
-	"github.com/rifflock/lfshook"
-	log "github.com/sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 	"github.com/skratchdot/open-golang/open"
 	haikunator "github.com/yelinaung/go-haikunator"
 	filetype "gopkg.in/h2non/filetype.v1"
 )
 
-// Log is exported because log was taken already
-var Log *log.Logger
-var jobLog *log.Logger
-var online chan (bool)
-
+var log = logrus.New()
 var currentUser string
 
 func init() {
+	//  You could set this to any `io.Writer` such as a file
+	file, err := os.OpenFile("logrus.log", os.O_CREATE|os.O_WRONLY, 0666)
+	if err == nil {
+		log.Out = file
+	} else {
+		log.Info("Failed to log to file, using default stderr")
+	}
+
 	open.Run("http://localhost:8080")
 	cmd, err := exec.Command("who").CombinedOutput()
 	if err != nil {
-		log.Error("failed to make frames", err)
+		log.Error("failed to know who is running the app, err: ", err)
 	}
 	currentUser = strings.Split(string(cmd), " ")[0]
-	basePath = fmt.Sprintf("/Users/%s/Desktop/dreamly", currentUser)
-	go internet()
-}
-
-func internet() {
-	for {
-		timeout := time.Duration(1 * time.Minute)
-		_, err := net.DialTimeout("tcp", "http://google.com", timeout)
-		if err != nil {
-			online <- false
-			log.Info("Site unreachable, error: ", err)
-		} else {
-			online <- true
-			log.Info("internet is up")
-		}
-	}
+	basePath = fmt.Sprintf("/Users/%s/Desktop/bind", currentUser)
 }
 
 // makes sure we have our working dir to place all our files
-func ensureDreamlyDirs() error {
-	// usr, err := homedir.Dir()
-	// if err != nil {
-	// 	log.Error("failed to get homedir", err)
-	// }
-	// exp, err := homedir.Expand(usr)
-	// if err != nil {
-	// 	log.Error("failed to get expanded homedir", err)
-	// }
+func ensureBindDirs() error {
 	user, err := user.Current()
 	if err != nil {
 		log.Fatal(err)
@@ -78,15 +57,15 @@ func ensureDreamlyDirs() error {
 	log.Info("Username: " + user.Username)
 	log.Info("Home Dir: " + user.HomeDir)
 	log.Info("this is the normal user: ", currentUser)
-	basePath := fmt.Sprintf("/Users/%s/Desktop/dreamly", currentUser)
+	basePath := fmt.Sprintf("/Users/%s/Desktop/bind", currentUser)
 	// log.Info("dir: ", usr, " and expanded dir: ", exp, " and basePath to be working from is ", basePath)
-	log.Info("dreamly folder  basePath: ", basePath)
+	log.Info("bind folder  basePath: ", basePath)
 	if _, err := os.Stat(basePath); os.IsNotExist(err) {
 		err := os.Mkdir(basePath, 0777)
 		if err != nil {
 			log.Error("failed os.Mkdir", err)
 		}
-		log.Info("dreamly FOLDER was created")
+		log.Info("bind FOLDER was created")
 	}
 	// also make dirs that live inside it
 	frames := fmt.Sprintf("%s/frames", basePath)
@@ -95,7 +74,7 @@ func ensureDreamlyDirs() error {
 		if err != nil {
 			log.Error("failed os.Mkdir", err)
 		}
-		log.Info("dreamly frames was created")
+		log.Info("bind frames was created")
 	}
 	audio := fmt.Sprintf("%s/audio", basePath)
 	if _, err := os.Stat(audio); os.IsNotExist(err) {
@@ -103,7 +82,7 @@ func ensureDreamlyDirs() error {
 		if err != nil {
 			log.Error("failed os.Mkdir", err)
 		}
-		log.Info("dreamly audio was created")
+		log.Info("bind audio was created")
 	}
 	videos := fmt.Sprintf("%s/videos", basePath)
 	if _, err := os.Stat(videos); os.IsNotExist(err) {
@@ -111,7 +90,7 @@ func ensureDreamlyDirs() error {
 		if err != nil {
 			log.Error("failed os.Mkdir", err)
 		}
-		log.Info("dreamly video was created")
+		log.Info("bind video was created")
 	}
 	logs := fmt.Sprintf("%s/logs", basePath)
 	if _, err := os.Stat(logs); os.IsNotExist(err) {
@@ -119,7 +98,7 @@ func ensureDreamlyDirs() error {
 		if err != nil {
 			log.Error("failed os.Mkdir", err)
 		}
-		log.Info("dreamly logs was created")
+		log.Info("bind logs was created")
 	}
 	return nil
 }
@@ -182,7 +161,6 @@ func checkFile(c *gin.Context) (string, error) {
 // howManyOf returns list of .ext at a path
 func howManyOf(ext string, pathS string) int {
 	list := make([]string, 0, 100)
-
 	// get all gifs in deepgif dir
 	err := filepath.Walk(pathS, func(path string, info os.FileInfo, err error) error {
 		if info.IsDir() {
@@ -231,19 +209,4 @@ func renamer(n string) string {
 	fmt.Print("\n We had to rename the file")
 	h := haikunator.New(time.Now().UTC().UnixNano())
 	return fmt.Sprintf("%s%s", n, h.Haikunate())
-}
-
-func newLogger() *log.Logger {
-
-	if Log != nil {
-		return Log
-	}
-
-	Log = log.New()
-	Log.Hooks.Add(lfshook.NewHook(lfshook.PathMap{
-		log.InfoLevel:  basePath + "/logs/info.txt",
-		log.ErrorLevel: basePath + "/logs/error.txt",
-	}, &log.JSONFormatter{}))
-
-	return Log
 }

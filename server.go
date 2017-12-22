@@ -5,7 +5,6 @@ import (
 	"net/http"	
 	"time"
 	
-	log "github.com/sirupsen/logrus"
 	"github.com/skratchdot/open-golang/open"
 	"github.com/gin-gonic/gin"
 	"github.com/glibs/gin-webserver"
@@ -21,12 +20,11 @@ func web() {
 // InitializeServer gets our gin running front end poppin off
 func InitializeServer(host string) (server *network.WebServer) {
 	rand.Seed(time.Now().UTC().UnixNano())
-	newLogger()
 	// Make sure folders exist that we want:
-	if err := ensureDreamlyDirs(); err != nil {
-		log.Error("Failed to have home working dir to put the files into at ~/Desktop/dreamly, suxx", err)
+	if err := ensureBindDirs(); err != nil {
+		log.Error("Failed to have home working dir to put the files into at ~/Desktop/bind, suxx", err)
 	} else {
-		log.Info("dreamly dirs ensured!")
+		log.Info("bind dirs ensured!")
 	}
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.Default()
@@ -46,5 +44,11 @@ func InitializeServer(host string) (server *network.WebServer) {
 	r.GET("/openvideos", func(c *gin.Context) {
 		open.Run(basePath + "/videos")
 	})
+	
+	r.GET("/openlogs", func(c *gin.Context) {
+		open.Run(basePath + "/logs")
+	})
+
+
 	return network.InitializeWebServer(r, host)
 }

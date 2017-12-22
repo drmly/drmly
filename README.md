@@ -1,16 +1,16 @@
-Bind is in early development! There are many rough edges. Please file issues for any bugs you find.
+Bind is in early development! There are many rough edges. File issues for any bugs you find.
 
-----------
-What it looks like:
-----------
 ![Alt Text](bg.png?raw=true "will")
 ----------
 Gifs made with bind: (to see vids go to http://reddit.com/r/deepdreamvideo)
 ----------
 
-![Alt Text](https://media.giphy.com/media/3oFzmnlg0UXEgkNGh2/giphy.gif)
-![Alt Text](https://media.giphy.com/media/xULW8CulD7x86n4Hdu/giphy.gif)
-![Alt Text](https://media.giphy.com/media/3oFzmf2YjR0CskBB1m/giphy.gif)
+![Shapes](https://media.giphy.com/media/xULW8qKMNmfa4RZIPe/giphy.gif)
+![Human](https://media.giphy.com/media/3oFzmnlg0UXEgkNGh2/giphy.gif)
+![Celebrity](https://media.giphy.com/media/xULW8CulD7x86n4Hdu/giphy.gif)
+![Wrestling](https://media.giphy.com/media/3oFzmf2YjR0CskBB1m/giphy.gif)
+
+
 
 
 -----------
@@ -38,21 +38,28 @@ ffprobe (probably installed along with ffmpeg)
 Installation:
 ----------
 
-either go get OR dep ensure 
+go get -u github.com/dreamlyteam/bind 
 
+cd $GOPATH/src/github.com/dreamlyteam/bind
+dep ensure
 go build
 
  ./bind
+
+
+------------
+Usage
+------------
 
 point browser to localhost:8080
 
 (because we need to download the Inception model, the first time running a job python will download a 53 megabyte tensorflow_inception_graph.pb into the bind/models dir)
 
 ------------
-Supports
+Filetypes supported:
 ------------
 
-Anything it should, videos of any extension, gifs, and images of course
+Tries to support anything with pixels automatically, videos of any extension, gifs, and images of course. [Suggest a new filetype](https://github.com/dreamlyteam/bind/issues/new)
 
 ------------
 Want to take video on your cell phone from exotic locations and send the job to your computer at home? 
@@ -64,38 +71,27 @@ download https://ngrok.com/download  -> start it with:
 
 ånd then your terminal will display the ngrok url to use on your cell phone, for example: http://c55d5584.ngrok.io     Type that into your phone. 
 
-
 ------------------
-donations accepted:  dreamlyteam@gmail.com
-------------------
-
-LTC:
- Lfoa64kkZS9gDihVA9PEQY46NjUvhZBs9p
-
-BCH:
-18tvu2tf6ZcFKEFDP26Q5gBmNa5d62q9jM
-
-ETH:
-0x876b28d1aB248A9E05D7a2ef904095987c83E516
-
-BTC:
-16bfdgzL5st8bVPGV2JCerkgSAMXNuciEE
-
-
-Venmo:
-https://venmo.com/Tim-Bone
-
-------------------
-Join, Debug, Follow, Apply, Like,:
+OSX tensorflow-gpu installation walkthroughs guide...(WIP) 
 ------------------
 
-https://www.facebook.com/dreamly.cc/
+// Here be dragons. Thou art forewarned (difficulty level: Shao Kahn from MK2 tough.)
 
-https://dreamlycc.slack.com
 
-https://join.slack.com/t/dreamlycc/shared_invite/enQtMjg3NzMxOTQ3OTg5LTNjNjU1ZWYzMGFmMTFkZWY5ZTRhMWY0MDM5NTRiMzI3NmI1MGE2NGMyOWI5MTU1YTQ4ZjUwN2YxNWU5ODMyYTc
+[maybe try this one](https://metakermit.com/2017/compiling-tensorflow-with-gpu-support-on-a-macbook-pro/)
 
-https://docs.google.com/forms/d/1KvOZyPu3QamuF_YZtyrCbpS7JbC1oxoyUB3GZVrfVLY/edit
+[or maybe this ones better](https://medium.com/@mattias.arro/installing-tensorflow-1-2-from-sources-with-gpu-support-on-macos-4f2c5cab8186)
+
+Or maybe something like a .whl would make it faster figuring this out?  [try this](https://github.com/qinyuhang/tensorflow-mac-build)
+
+[Improve this guide](https://github.com/dreamlyteam/bind/issues/new)
+
+------------------
+[Share your results on Reddit](http://reddit.com/r/deepdreamvideo) [Debug on Slack](https://dreamlycc.slack.com)
+------------------
+
+
+
 
 ------
 We use
@@ -110,6 +106,8 @@ Roadmap
 ------
 √ Optical flow (see code at: https://github.com/ksk-S/DeepDreamVideoOpticalFlow/blob/master/dreamer.py)
 
+√ More parameters and more parameter automations implemented
+
 √ Clear steps to reproducible builds for any computer.
 
 √ Make deep dreaming accessible as art
@@ -123,7 +121,23 @@ Wishlist
 • A tool that helps people install tensorflow-gpu for macs
 
 
-License
--------------
+------------------
+Donations accepted, send me an email, just decrypt it first: ∂®´åµ¬¥†´åµ™©µåˆ¬≥çøµ 
+------------------
 
-MIT 2017  Tim Bone
+LTC:
+ Lfoa64kkZS9gDihVA9PEQY46NjUvhZBs9p
+
+BTC:
+16bfdgzL5st8bVPGV2JCerkgSAMXNuciEE
+
+BCH:
+18tvu2tf6ZcFKEFDP26Q5gBmNa5d62q9jM
+
+ETH:
+0x876b28d1aB248A9E05D7a2ef904095987c83E516
+
+
+
+Venmo:
+https://venmo.com/Tim-Bone

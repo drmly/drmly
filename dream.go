@@ -8,7 +8,7 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	log "github.com/sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 	"github.com/skratchdot/open-golang/open"
 )
 
@@ -30,14 +30,11 @@ func dream(c *gin.Context) {
 	li := c.PostForm("li")
 	iw := c.PostForm("iw")
 	rle := c.PostForm("rle")
-
+	// stretch:=c.Postform("stretchvideo")
 	isJob = true
 	defer func() {
 		isJob = false
 	}()
-	log.WithFields(log.Fields{
-		"job": "mp42dream",
-	}).Info("started a a deep dream job")
 
 	file, err := c.FormFile("file")
 	if err != nil {
@@ -53,6 +50,20 @@ func dream(c *gin.Context) {
 		fullName = name + "." + strings.Split(file.Filename, ".")[1]
 		log.Info("\nwe renamed as: ", fullName)
 	}
+	newJob(name)
+	//let's save interesting job metadata for the user in a tidy format (err logs, srv logs kept with the binary or maybe put in bind dir? wip)
+	jobLog.WithFields(logrus.Fields{
+		"name": name,
+		"fps":  fps,
+		"it":   it,
+		"oc":   oc,
+		"la":   la,
+		"rl":   rl,
+		"ow":   ow,
+		"li":   li,
+		"iw":   iw,
+		"rle":  rle,
+	}).Info("A futuristic hyper robo dream from the future is ")
 
 	// make new folder for job
 	framesDirPath := fmt.Sprintf("%s/frames/%s", basePath, name)
@@ -83,7 +94,7 @@ func dream(c *gin.Context) {
 	ext := strings.Split(file.Filename, ".")[1]
 	// decide what to do with the file we've gotten, if it's an image:
 	if ext == "png" || ext == "jpg" || ext == "jpeg" {
-		cmd,err:=exec.Command("ffmpeg", "-i", uploadedFile, framesDirPath+"/"+name+".png").CombinedOutput()
+		cmd, err := exec.Command("ffmpeg", "-i", uploadedFile, framesDirPath+"/"+name+".png").CombinedOutput()
 		if err != nil {
 			log.Error("oops, failed trying to make some image of ext ", ext, " to .png")
 		} else {
@@ -146,59 +157,58 @@ func dream(c *gin.Context) {
 		}
 	}
 
+	log.Info("entering dreamer goroutine")
 	// deep dream the frames
-	go func() {
-		log.Info("inside dreamer goroutine")
-		cmd, err := exec.Command("python3", "folder.py", "--input", framesDirPath, "-it", it, "-oc", oc, "-la", la, "-rl", rl, "-rle", rle, "-li", li, "-iw", iw, "-ow", ow).CombinedOutput()
-		if err != nil {
-			log.WithFields(log.Fields{
-				"event": "folder.py",
-			}).Error("failed to dream", err)
-			c.String(200, "Abort, this app is crashing, can't dream")
-		}
-		log.Info("done w/ dream loop, python said: ", string(cmd))
+	cmd, err := exec.Command("python3", "folder.py", "--input", framesDirPath, "-it", it, "-oc", oc, "-la", la, "-rl", rl, "-rle", rle, "-li", li, "-iw", iw, "-ow", ow).CombinedOutput()
+	if err != nil {
+		log.WithFields(logrus.Fields{
+			"event": "folder.py",
+		}).Error("failed to dream", err)
+		c.String(200, "Abort, this app is crashing, can't dream")
+	}
+	log.Info("done w/ dream loop, python said: ", string(cmd))
 
-		// put frames together into an mp4 in videos dir
-		newVideo := fmt.Sprintf("%s/videos/%s", basePath, name+".mp4")
-		frames := fmt.Sprintf("%s/output/%s.png", framesDirPath, "%d")
-		log.Info("frames to be turned into mp4 at: ", frames)
-		// framesDir := fmt.Sprintf("%s/output/%s.png", framesDirPath, "%d")
-		// ffmpeg -r 5 -f image2 -i ~/Desktop/dreamly/frames/FILENAME/output/%d.png -vcodec libx264 -crf 25 -pix_fmt yuv420p out.mp4
-		_, err = exec.Command("ffmpeg", "-r", fps, "-f", "image2", "-i", frames, "-vcodec", "libx264", "-crf", "25", "-pix_fmt", "yuv420p", newVideo).CombinedOutput()
+	// put frames together into an mp4 in videos dir
+	newVideo := fmt.Sprintf("%s/videos/%s", basePath, name+".mp4")
+	frames := fmt.Sprintf("%s/output/%s.png", framesDirPath, "%d")
+	log.Info("frames to be turned into mp4 at: ", frames)
+	// framesDir := fmt.Sprintf("%s/output/%s.png", framesDirPath, "%d")
+	// ffmpeg -r 5 -f image2 -i ~/Desktop/dreamly/frames/FILENAME/output/%d.png -vcodec libx264 -crf 25 -pix_fmt yuv420p out.mp4
+	_, err = exec.Command("ffmpeg", "-r", fps, "-f", "image2", "-i", frames, "-vcodec", "libx264", "-crf", "25", "-pix_fmt", "yuv420p", newVideo).CombinedOutput()
+	if err != nil {
+		log.Error("still failing to output a video meh, ", err)
+	} else {
+		log.Info("\nmade mp4 from frames")
+	}
+	if ov == "ov" {
+		open.Run(basePath + "/videos")
+	}
+
+	//  is there sound?
+	audio, err := exec.Command("ffprobe", uploadedFile, "-show_streams", "-select_streams", "a", "-loglevel", "error").CombinedOutput()
+	if err != nil {
+		log.Error("Failed to test audio, ", err)
+	}
+	// add sound back in if there is any
+	// ffmpeg -i 2171447000212516064.mp4 -i gold.mp4  -map 0:v -map 1:a output.mp4
+	if len(audio) > 1 {
+		log.Info("there's sound in this clip")
+		out, err := exec.Command("ffmpeg", "-y", "-i", newVideo, "-i", uploadedFile, "-map", "0:v", "-map", "1:a", basePath+"/videos/audio_"+name+".mp4").CombinedOutput()
 		if err != nil {
-			log.Error("still failing to output a video meh, ", err)
+			log.Error("failed to add sound back", err)
 		} else {
-			log.Info("\nmade mp4 from frames")
-		}
-
-		if ov == "ov" {
-			open.Run(basePath + "/videos")
-		}
-
-		//  is there sound?
-		audio, err := exec.Command("ffprobe", uploadedFile, "-show_streams", "-select_streams", "a", "-loglevel", "error").CombinedOutput()
-		if err != nil {
-			log.Error("Failed to test audio, ", err)
-		}
-		// add sound back in if there is any
-		// ffmpeg -i 2171447000212516064.mp4 -i gold.mp4  -map 0:v -map 1:a output.mp4
-		if len(audio) > 1 {
-			log.Info("there's sound in this clip")
-			out, err := exec.Command("ffmpeg", "-y", "-i", newVideo, "-i", uploadedFile, "-map", "0:v", "-map", "1:a", basePath+"/videos/audio_"+name+".mp4").CombinedOutput()
-			if err != nil {
-				log.Error("failed to add sound back", err)
-			} else {
-				log.Info("fffmpeg added sound:", string(out))
-				if ovf == "ovf" {
-					open.Run(basePath + "/videos/audio_" + name + ".mp4")
-				}
-				// todo remove newVideo, so we only save one w/ audio
+			log.Info("fffmpeg added sound:", string(out))
+			if ovf == "ovf" {
+				open.Run(basePath + "/videos/audio_" + name + ".mp4")
 			}
-		} else {
-			log.Info("there's no sound")
+			// todo remove newVideo, so we only save one w/ audio
 		}
-		if ovf == "ovf" {
-			open.Run(newVideo)
-		}
-	}()
+	} else {
+		log.Info("there's no sound")
+	}
+	if ovf == "ovf" {
+		open.Run(newVideo)
+	}
+	//stretch video enabled?
+	// -i input.mp4 -vf scale=ih*16/9:ih,scale=iw:-2,setsar=1 -crf 20 -c:a copy YT.mp4
 }

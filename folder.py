@@ -107,7 +107,7 @@ def deep_dream(model, output_path, input_image=noise):
         if count < output_count: #hack to finish a partially completed job
             count+=1
             continue
-        if rle != 0 and rle % len(image_file):
+        if rle != 0 and rle % count: #only randomize every n frames
             print("random layer in ", str(rl), " frames")
             if  "nc" in rl:
                 layer=random.choice(no_conv)
