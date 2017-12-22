@@ -20,7 +20,7 @@ import glob
 
 # parameter
 model_name = "tensorflow_inception_graph.pb"
-imagenet_mean = 117.0
+imagenet_mean = 120.0
 layer = 'mixed4c'
 iter_num = 1
 octave_num = 1
@@ -54,7 +54,7 @@ def define_args():
     parser.add_argument("-oc", "--octaves", help="specify octaves", default="2")
     parser.add_argument("-la", "--layer", help="specify layer name", default="mixed4c")
     parser.add_argument("-rl", "--randomlayer", help="specify random layer", default="Default")
-    parser.add_argument("-rle", "--randomlayerevery", help="specify random layer every n frames", default="")
+    parser.add_argument("-rle", "--randomlayerevery", help="specify random layer every n frames", default="0")
     parser.add_argument("-iw", "--itwaver", help="randomize the number of iterations up and down by this amount", default="0")
     parser.add_argument("-ow", "--ocwaver", help="randomize the number of octaves up and down by this amount", default="0")
     return parser.parse_args()
@@ -107,7 +107,7 @@ def deep_dream(model, output_path, input_image=noise):
         if count < output_count: #hack to finish a partially completed job
             count+=1
             continue
-        if rle != 0 and rle % len(image_file):
+        if rle != 0 and rle % count: #only randomize every n frames
             print("random layer in ", str(rl), " frames")
             if  "nc" in rl:
                 layer=random.choice(no_conv)

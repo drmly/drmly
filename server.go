@@ -2,34 +2,36 @@ package main
 
 import (
 	"math/rand"
-	"net/http"	
+	"net/http"
+	"os"
 	"time"
-	
-	log "github.com/sirupsen/logrus"
-	"github.com/skratchdot/open-golang/open"
+
 	"github.com/gin-gonic/gin"
 	"github.com/glibs/gin-webserver"
+	"github.com/skratchdot/open-golang/open"
 )
 
 func web() {
 	host := "0.0.0.0:8080"
 	server := InitializeServer(host)
 	server.Start()
-	log.Info("Gin web server started on " + host)
+	Log.Info("Gin web server started on " + host)
 }
 
 // InitializeServer gets our gin running front end poppin off
 func InitializeServer(host string) (server *network.WebServer) {
 	rand.Seed(time.Now().UTC().UnixNano())
-	newLogger()
 	// Make sure folders exist that we want:
-	if err := ensureDreamlyDirs(); err != nil {
-		log.Error("Failed to have home working dir to put the files into at ~/Desktop/dreamly, suxx", err)
+	if err := ensureBindDirs(); err != nil {
+		Log.Error("Failed to have home working dir to put the files into at ~/Desktop/bind, suxx", err)
 	} else {
-		log.Info("dreamly dirs ensured!")
+		Log.Info("bind dirs ensured!")
 	}
-	gin.SetMode(gin.ReleaseMode)
-	r := gin.Default()
+	if os.Args[0] != "d" { //development mode
+		Log.Info("debug mode")
+		gin.SetMode(gin.ReleaseMode)
+	}
+	r := gin.New()
 	r.LoadHTMLGlob("public/tmpl/*.html")
 	r.StaticFS("/videos", http.Dir(basePath+"/videos"))
 	r.StaticFS("/frames", http.Dir(basePath+"/frames"))
@@ -46,5 +48,10 @@ func InitializeServer(host string) (server *network.WebServer) {
 	r.GET("/openvideos", func(c *gin.Context) {
 		open.Run(basePath + "/videos")
 	})
+
+	r.GET("/openlogs", func(c *gin.Context) {
+		open.Run(basePath + "/logs")
+	})
+
 	return network.InitializeWebServer(r, host)
 }

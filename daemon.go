@@ -7,16 +7,14 @@ import (
 	"os/signal"
 	"syscall"
 
-	"log"
-
 	"github.com/takama/daemon"
 )
 
 const (
 
 	// name of the service
-	name        = "dreamlyservice"
-	description = "My dreamer Service http://dreamly.cc"
+	name        = "bindservice"
+	description = "My dreamer Service http://deepdreamvideo.com"
 	version     = "v0.0.3"
 
 	// port which daemon should be listen
@@ -25,8 +23,6 @@ const (
 
 // dependencies that are NOT required by the service, but might be used
 var dependencies = []string{"dummy.service"}
-
-var stdlog, errlog *log.Logger
 
 // Service has embedded daemon
 type Service struct {
@@ -83,8 +79,8 @@ func (service *Service) Manage() (string, error) {
 		case conn := <-listen:
 			go handleClient(conn)
 		case killSignal := <-interrupt:
-			stdlog.Println("Got signal:", killSignal)
-			stdlog.Println("Stoping listening on ", listener.Addr())
+			Log.Info("Got signal:", killSignal)
+			Log.Info("Stoping listening on ", listener.Addr())
 			listener.Close()
 			if killSignal == os.Interrupt {
 				return "Daemon was interrupted by system signal", nil
@@ -119,7 +115,3 @@ func handleClient(client net.Conn) {
 	}
 }
 
-func init() {
-	stdlog = log.New(os.Stdout, "", log.Ldate|log.Ltime)
-	errlog = log.New(os.Stderr, "", log.Ldate|log.Ltime)
-}

@@ -4,13 +4,13 @@
     <link rel='icon' href='favicon.ico' />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta charset='utf-8'>
-    <title>😍 ß†π∂ 😴</title>
+    <title>ß†π∂ 😴</title>
 </head>
 <script src="public/jquery.js"></script>
 <script src="public/dropzone.min.js"></script>
 
 
-<body class="stretch" style="background-color:rgb(235, 229, 209); height: 100%; ;">
+<body class="stretch " style="background-color:rgb(235, 229, 209); height: 100%; ;">
     <h2>
         <a href="/frames">frames</a>
         <a href="/jobs">jobs</a>
@@ -18,6 +18,7 @@
     </h2>
 
     <div class="button-container">
+
         <form action="/openframes" target="dummyframe">
             <input id="openframes" type="submit" value="open frames" />
         </form>
@@ -25,6 +26,11 @@
         <form action="/openvideos" target="dummyframe">
             <input id="openvideos" type="submit" value="open videos" />
         </form>
+
+        <form action="/openlogs" target="dummyframe">
+            <input id="openlogs" type="submit" value="open logs" />
+        </form>
+
     </div>
     <div style="color:forestgreen">
         <div title="tip: practice with a short 5 second video to get paramaters how you like"> here's an easy place to get short practice videos:
@@ -32,6 +38,17 @@
         </div>
     </div>
 
+    <!-- video output options:
+    <div>
+        <input type="checkbox" name="stretchvideo" value="stretchvideo"> stretch video
+        todo: put original side by side with dreamed version in another mp4 
+    </div> -->
+
+    <!-- todo -->
+    <!-- posting to social media:
+    <div>
+         post to /r/deepdreamvideo <input type="checkbox">
+    </div> -->
     <!-- todo -->
     <!-- Youtube-dl support: -->
     <!-- <input type="text" value="https://www.youtube.com/watch?v=g_-xeKD7ZfA"> -->
@@ -71,16 +88,21 @@
                   <option value="5" selected>5</option>
               </select> -->
             <!-- <input type="number" step="2" value="20" max="90"> Temporal incoherence stabilizer (how much previous frame opacity overlay) -->
+            <!--             
+            <div>
+                save as defaults 
+                <input type="button">
+            </div> -->
             <div>
                 open frames dir
-                <input id="openafter" type="checkbox" name="of" value="of"> output dir
+                <input checked id="openafter" type="checkbox" name="of" value="of"> output dir
                 <input type="checkbox" name="oo" value="oo"> video dir
                 <input type="checkbox" name="ov" value="ov"> video file
                 <input type="checkbox" checked name="ovf" value="ovf">
             </div>
             <div style="color:forestgreen" title="tip: consider slicing the video to frames to check for optimum fps, then cancel job if processing excessive frames. Also if on a mac preview can tell you how many frames are in a gif">
                 <br> fps:
-                <input id="fps" type="number" step="1" max="20" value="5" name="fps">
+                <input id="fps" type="number" step="1" max="30" value="9" name="fps">
             </div>
             <div>
                 randomization type:
@@ -120,7 +142,7 @@
                     <option value='mixed4d'>mixed4d peacock</option>
                     <option value='mixed4e'>mixed4e chalice</option>
                     <option value='mixed5a'>mixed5a</option>
-                    <option value='mixed5b'>mixed5b</option>
+                    <option value='mixed5b'>mixed5b wavy</option>
                     <option value='conv2d0'>conv2d0 blur</option>
                     <option value='conv2d1'>conv2d1 neon</option>
                     <option value='conv2d2'>conv2d2 tapestry</option>
@@ -130,11 +152,12 @@
             <input id="iterations" type="number" min="1" step="1" max="1000" name="iterations" value="5">
             <!-- <br><input type="checkbox" name="itr"> make iterations random every frame between 1 -20 -->
             <br>octaves:
-            <input id="octaves" type="number" step="1" max="40" name="octaves" value="1"> 
+            <input id="octaves" type="number" step="1" max="40" name="octaves" value="1">
             <!-- octave scale: <input type="text" name="dream levels"> dream scale coefficient: -->
             <div>
-                <input type='file' name="file" id="choose" />
+                <input type='file' name="file" id="choose">
                 <img id="blah" src="#" alt="" />
+                <!-- todo: sync dir option(continually output dreams from a dir as it) -->
                 <input style="background-color: rgb(187, 142, 189)" id="start" type="submit" value="start dreaming">
             </div>
         </form>
@@ -150,15 +173,23 @@
     </footer>
 
 
-    <script> //keypressing shortcuts
+    <script>
+        //keypressing shortcuts
+        // todo: make numeric keys shortcut to saved parameter sets 
         function keycodes() {
             alert("key press shortcuts available, going by first letter if available, second letter if not")
         }
         var start = $("#start")
         $(this).on('keydown', function (e) {
-            // $('#label').text(e.keyCode);
+            $('#label').text(e.keyCode);
+            e.which == 49 ?
+                $("fps").val == '4' : null// todo have 49 key all values to 1 (perfect for dev. mode!) later implement for all numeric keys
             e.which == 191 ?
                 keycodes() : null
+            e.which == 69 ?
+                $("#openlogs").click() : null
+            e.which == 12 ?
+                $("#compress").focus() : null
             e.which == 71 ?
                 window.open('http://giphy.com', '_blank') : null
             e.which == 74 ?
@@ -187,12 +218,17 @@
                 $("#start").focus() : null
             e.which == 73 ?
                 $("#iterations").focus() : null
-            e.which == 73 ?
-                $("#iterations").focus() : null
             e.which == 76 ?
                 $("#lii").focus() : null
             e.which == 72 ?
                 $("#choose").focus() : null
+            if (e.which == 90) {
+                if ($("body").hasClass("bg")) {
+                    $("body").removeClass("bg");
+                } else {
+                    $("body").addClass("bg");
+                }
+            }
         });
         select = $("#layer") //random which layer on startup or focus on layer choice
         select[Math.floor(Math.random() * select.length)].selected = true
@@ -201,12 +237,29 @@
 </body>
 
 <style type="text/css">
+    /* body{
+        position: relative;
+    } */
+
     body {
+        content: "";
+        display: block;
+        z-index: -1;
         color: rgb(0, 0, 0);
+        /* opacity: 0.1; */
         background-color: #d8da3d display: inline-block;
         font-size: 32px;
+
         transform-origin: 0 0;
     }
+
+    .bg {
+        background-image: url('./public/d.png');
+    }
+
+    /* .bg.hide {
+        background-image:none;
+    } */
 
     span {
         font-size: 16px;
