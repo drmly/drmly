@@ -72,3 +72,11 @@
 [[constraint]]
   branch = "master"
   name = "github.com/yelinaung/go-haikunator"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/TableMountain/goydl"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/tjgq/clipboard"

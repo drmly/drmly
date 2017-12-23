@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/TableMountain/goydl"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 	"github.com/skratchdot/open-golang/open"
@@ -16,8 +17,9 @@ import (
 var isJob bool
 var basePath string
 
-// Dream is exported so it can be an api, haha what fun. Games perhaps? Stock trading? Some real time video effect? 
+// Dream is exported so it can be an api, haha what fun. Games perhaps? Stock trading? Some real time video effect?
 func Dream(c *gin.Context) {
+	yt := c.PostForm("yt")
 	fps := c.PostForm("fps")
 	ov := c.PostForm("ov") //data the user uploaded we want
 	ovf := c.PostForm("ovf")
@@ -38,14 +40,6 @@ func Dream(c *gin.Context) {
 		isJob = false
 	}()
 
-	file, err := c.FormFile("file")
-	if err != nil {
-		Log.Info("failed to get file", err)
-		return
-	}
-	name := strings.Split(file.Filename, ".")[0]
-	fullName := file.Filename
-
 	Log.WithFields(logrus.Fields{
 		"event": "new job started",
 	})
@@ -64,34 +58,114 @@ func Dream(c *gin.Context) {
 	})
 
 	Log.Info("base path is ", basePath)
-	if alreadyHave(basePath + "/frames/" + name) {
-		name = renamer(name)
-		fullName = name + "." + strings.Split(file.Filename, ".")[1]
-		Log.Info("\nwe renamed as: ", fullName)
-	}
+
 	newJob(name)
 	//let's save interesting job metadata for the user in a tidy format (err logs, srv logs kept with the binary or maybe put in bind dir? wip)
 	jobLog.WithFields(logrus.Fields{
-		"fps":  fps,
-		"iterations":   it,
-		"octaves":   oc,
-		"layer":   la,
-		"linear increase":   li,
-		"iteration waver":   iw,
-		"octave waver":   ow,
-		"randomization type":   rl,
-		"random layer every n frames":  rle,
+		"fps":                         fps,
+		"iterations":                  it,
+		"octaves":                     oc,
+		"layer":                       la,
+		"linear increase":             li,
+		"iteration waver":             iw,
+		"octave waver":                ow,
+		"randomization type":          rl,
+		"random layer every n frames": rle,
 	}).Info("job name: ", name)
 
-	// make new folder for job
-	framesDirPath := fmt.Sprintf("%s/frames/%s", basePath, name)
-	if _, err := os.Stat(framesDirPath); os.IsNotExist(err) {
-		if err = os.Mkdir(framesDirPath, 0777); err != nil {
-			Log.Error("failed to make a new job dir w/ error: ", err)
-		}
-		Log.Info("frames folder for new job was created at ", framesDirPath)
-	}
+	//
+	var uploadedFile, framesDirPath string
+	var name, fullName, ext string
 
+	if yt != "" { //if "yt" checkbox checked
+		youtubeDl := goydl.NewYoutubeDl()
+		for { //we loop until we got an acceptable ytURL
+			fmt.Println("waiting...")
+			youtubeDl.VideoURL = ytURL
+			fmt.Println("videoURL:", ytURL)
+			if ytURL == "" { //we didn't get a url, so just cancel the job
+				Log.Info("the url was blank (therefore no good ytURL yet), so just cancel the job")
+				return
+			}
+			info, err := youtubeDl.GetInfo()
+			if err != nil {
+				Log.WithFields(logrus.Fields{
+					"event": "ytdl",
+					"error": err,
+				}).Error("we should never fail here")
+				continue
+			}
+			fmt.Println(youtubeDl.VideoURL, "blah")
+			ext = info.Ext
+			name = strings.Split(info.Title, " ")[0]
+			fullName = name + ".mp4"
+			if alreadyHave(basePath + "/frames/" + name) {
+				name = renamer(name)
+				fullName = name + ".mp4"
+				Log.Info("\nwe renamed as: ", fullName)
+			}
+			uploadedFile := fmt.Sprintf("%s/frames/%s/%s.mp4", basePath, name, name)
+			fmt.Println("uploaded file: ", uploadedFile)
+			youtubeDl.Options.Output.Value = uploadedFile
+			youtubeDl.Options.Format.Value = "mp4"
+			cmd, err := youtubeDl.Download(youtubeDl.VideoURL)
+			if err != nil {
+				Log.WithFields(logrus.Fields{
+					"event":        "error",
+					"err":          err,
+					"uploadedFile": uploadedFile,
+				}).Error("dl'ing from yt failed w err")
+			} else {
+				Log.WithFields(logrus.Fields{
+					"event": "download",
+					"path":  uploadedFile,
+				}).Info("downloaded a yt video")
+				println("starting download")
+				cmd.Wait()
+				println("finished download")
+
+				// make new folder for job
+				framesDirPath = fmt.Sprintf("%s/frames/%s", basePath, name)
+				if _, err := os.Stat(framesDirPath); os.IsNotExist(err) {
+					if err = os.Mkdir(framesDirPath, 0777); err != nil {
+						Log.Error("failed to make a new job dir w/ error: ", err)
+					}
+					Log.Info("frames folder for new job was created at ", framesDirPath)
+				}
+
+				break //we got our file, now we move on, we don't need to keep listening for URL
+			}
+		}
+	} else { // if no youtube, then get file from form upload
+		file, err := c.FormFile("file")
+		if err != nil {
+			Log.Error("failed to get file", err) //although this might not be an error as we support ytdl now
+			return
+		}
+		name = strings.Split(file.Filename, ".")[0]
+		fullName = file.Filename
+
+		ext = strings.Split(fullName, ".")[1]
+		if alreadyHave(basePath + "/frames/" + name) {
+			name = renamer(name)
+			fullName = name + "." + strings.Split(file.Filename, ".")[1]
+			Log.Info("\nwe renamed as: ", fullName)
+		}
+		// make new folder for job
+		framesDirPath = fmt.Sprintf("%s/frames/%s", basePath, name)
+		if _, err := os.Stat(framesDirPath); os.IsNotExist(err) {
+			if err = os.Mkdir(framesDirPath, 0777); err != nil {
+				Log.Error("failed to make a new job dir w/ error: ", err)
+			}
+			Log.Info("frames folder for new job was created at ", framesDirPath)
+		}
+		uploadedFile = fmt.Sprintf("%s/%s", framesDirPath, fullName)
+		if err := c.SaveUploadedFile(file, uploadedFile); err != nil {
+			Log.Error("failed to save file at path ", uploadedFile, " err is: ", err)
+		} else {
+			Log.Info("saved file at path ", uploadedFile)
+		}
+	}
 	// make a new output folder
 	outputPath := fmt.Sprintf("%s/output", framesDirPath)
 	if _, err := os.Stat(outputPath); os.IsNotExist(err) {
@@ -99,22 +173,16 @@ func Dream(c *gin.Context) {
 		Log.Info("output folder for new job was created at ", outputPath)
 	}
 	Log.Info("saved output dir at path ", outputPath)
-
-	// save the file
-	uploadedFile := fmt.Sprintf("%s/%s", framesDirPath, fullName)
-	if err := c.SaveUploadedFile(file, uploadedFile); err != nil {
-		Log.Error("failed to save file at path ", uploadedFile, " err is: ", err)
-	} else {
-		Log.Info("saved file at path ", uploadedFile)
-	}
+	uploadedFile = fmt.Sprintf("%s/%s", framesDirPath, fullName)
 
 	itsAVideo := false
-	ext := strings.Split(file.Filename, ".")[1]
 	// decide what to do with the file we've gotten, if it's an image:
-	if ext == "png" || ext == "jpg" || ext == "jpeg" {
+	if  ext == "png"{ //it's perfect, leave it alone...
+		
+	} else if ext == "jpg" || ext == "jpeg" {
 		cmd, err := exec.Command("ffmpeg", "-i", uploadedFile, framesDirPath+"/"+name+".png").CombinedOutput()
 		if err != nil {
-			Log.Error("oops, failed trying to make some image of ext ", ext, " to .png")
+			Log.Error("oops, failed trying to make some image of ext ", ext, " to png")
 		} else {
 			Log.Info("that's great, we got an image, those are easy, ffmpeg said:", string(cmd))
 		}
@@ -127,18 +195,17 @@ func Dream(c *gin.Context) {
 		cmd.Stdin = strings.NewReader("")
 		var out bytes.Buffer
 		cmd.Stdout = &out
-		err = cmd.Run()
+		err := cmd.Run()
 		if err != nil {
 			Log.Error("failed to make mp4 from gif ", err)
 		} else {
 			uploadedFile = strings.Split(uploadedFile, ".")[0] + ".mp4"
 			Log.Info("made mp4 from GIF")
 		}
-	} else {
+	} else { // if file not gif or img try to make it mp4
 		itsAVideo = true
-		// if file not gif or img try to make it mp4
 		Log.Info("ext: ", ext)
-		Log.Info("file.filename ", file.Filename)
+		Log.Info("file.filename ", fullName)
 		if ext != "mp4" {
 			cmd, err := exec.Command("ffmpeg", "-i", uploadedFile, strings.Split(uploadedFile, ".")[0]+".mp4").CombinedOutput()
 			if err != nil {
@@ -148,7 +215,6 @@ func Dream(c *gin.Context) {
 				err := os.Remove(uploadedFile)
 				if err != nil {
 					Log.Info("err removing original .mp4 as err: ", err)
-					return
 				} else {
 					uploadedFile = strings.Split(uploadedFile, ".")[0] + ".mp4"
 					Log.Info("deleted original at ext: ", ext)
@@ -219,14 +285,25 @@ func Dream(c *gin.Context) {
 			if ovf == "ovf" {
 				open.Run(basePath + "/videos/audio_" + name + ".mp4")
 			}
-			// todo remove newVideo, so we only save one w/ audio
+			// todo remove newVideo, so we only save one video, the one w/ audio
 		}
 	} else {
 		Log.Info("there's no sound")
-	}
-	if ovf == "ovf" {
-		open.Run(newVideo)
+		if ovf == "ovf" {
+			open.Run(newVideo)
+		}
 	}
 	//stretch video enabled?
 	// ffmpeg -i input.mp4 -vf scale=ih*16/9:ih,scale=iw:-2,setsar=1 -crf 20 -c:a copy YT.mp4
+	// out, err := exec.Command("ffmpeg", "-y", "-i", newVideo, "-i", uploadedFile, "-map", "0:v", "-map", "1:a", basePath+"/videos/"+name+"_audio.mp4").CombinedOutput()
+	// if err != nil {
+	// 	Log.Error("failed to add sound back", err)
+	// } else {
+	// 	Log.Info("fffmpeg added sound:", string(out))
+	// 	os.Remove(newVideo) //remove video w/o sound, we don't need it
+	// 	if ovf == "ovf" {
+	// 		open.Run(basePath + "/videos/" + name + "_audio.mp4")
+	// 	}
+	// 	// todo remove newVideo, so we only save one w/ audio
+	// }
 }

@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta charset='utf-8'>
     <title>ß†π∂ 😴</title>
+    <!-- todo: should light up on title w/ ytDl copied! -->
 </head>
 <script src="public/jquery.js"></script>
 <script src="public/dropzone.min.js"></script>
@@ -18,7 +19,6 @@
     </h2>
 
     <div class="button-container">
-
         <form action="/openframes" target="dummyframe">
             <input id="openframes" type="submit" value="open frames" />
         </form>
@@ -33,10 +33,13 @@
 
     </div>
     <div style="color:forestgreen">
-        <div title="tip: practice with a short 5 second video to get paramaters how you like"> here's an easy place to get short practice videos:
+        <div title="tip: practice with a short 5 second video to get paramaters how you like">
             <a id="giphy" href="http://giphy.com" target="_blank">giphy</a>
         </div>
     </div>
+
+    <!-- video input options: -->
+    <!-- video start time and end time -->
 
     <!-- video output options:
     <div>
@@ -51,7 +54,6 @@
     </div> -->
     <!-- todo -->
     <!-- Youtube-dl support: -->
-    <!-- <input type="text" value="https://www.youtube.com/watch?v=g_-xeKD7ZfA"> -->
     <!-- 
 <div>
     <br>
@@ -93,16 +95,17 @@
                 save as defaults 
                 <input type="button">
             </div> -->
+            <input id="yt" type="checkbox" name="yt" value="yt"> yt-dl clipboard
+            <span></span>
             <div>
-                open frames dir
-                <input checked id="openafter" type="checkbox" name="of" value="of"> output dir
-                <input type="checkbox" name="oo" value="oo"> video dir
-                <input type="checkbox" name="ov" value="ov"> video file
-                <input type="checkbox" checked name="ovf" value="ovf">
+                <input  id="openafter" type="checkbox" name="of" value="of"> open frames dir
+                <input checked type="checkbox" name="oo" value="oo"> output dir
+                <input type="checkbox" name="ov" value="ov"> video dir
+                <input type="checkbox" checked name="ovf" value="ovf">video file
             </div>
             <div style="color:forestgreen" title="tip: consider slicing the video to frames to check for optimum fps, then cancel job if processing excessive frames. Also if on a mac preview can tell you how many frames are in a gif">
                 <br> fps:
-                <input id="fps" type="number" step="1" max="30" value="9" name="fps">
+                <input id="fps" type="number" step="1" max="30" value="1" name="fps">
             </div>
             <div>
                 randomization type:
@@ -149,7 +152,7 @@
                 </select>
             </div>
             iterations:
-            <input id="iterations" type="number" min="1" step="1" max="1000" name="iterations" value="5">
+            <input id="iterations" type="number" min="1" step="1" max="1000" name="iterations" value="1">
             <!-- <br><input type="checkbox" name="itr"> make iterations random every frame between 1 -20 -->
             <br>octaves:
             <input id="octaves" type="number" step="1" max="40" name="octaves" value="1">
@@ -222,6 +225,8 @@
                 $("#lii").focus() : null
             e.which == 72 ?
                 $("#choose").focus() : null
+            e.which == 89 ?
+                $("#yt").focus() : null
             if (e.which == 90) {
                 if ($("body").hasClass("bg")) {
                     $("body").removeClass("bg");

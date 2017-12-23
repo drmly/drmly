@@ -10,7 +10,7 @@ import (
 	"github.com/takama/daemon"
 )
 
-const (
+var (
 
 	// name of the service
 	name        = "bindservice"

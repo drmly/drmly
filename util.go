@@ -17,20 +17,23 @@ import (
 	haikunator "github.com/yelinaung/go-haikunator"
 	filetype "gopkg.in/h2non/filetype.v1"
 )
-
+// Log is exported to not conflict w/ log(which gofmt was giving me troubles with when using with VSCode )
 var Log = logrus.New()
 var currentUser string
 
 func init() {
+	// let's log output for later grepping
 	//  You could set this to any `io.Writer` such as a file
-	file, err := os.OpenFile("logrus.log", os.O_CREATE|os.O_WRONLY, 0666)
-	if err == nil {
-		Log.Out = file
-	} else {
-		Log.Info("Failed to log to file, using default stderr")
-	}
+	// file, err := os.OpenFile("logrus.log", os.O_CREATE|os.O_WRONLY, 0666)
+	// if err == nil {
+	// 	Log.Out = file
+	// } else {
+	// 	Log.Info("Failed to log to file, using default stderr")
+	// }
 
 	open.Run("http://localhost:8080")
+
+	// set some common variables needed by dream()
 	cmd, err := exec.Command("who").CombinedOutput()
 	if err != nil {
 		Log.Error("failed to know who is running the app, err: ", err)
@@ -38,6 +41,7 @@ func init() {
 	currentUser = strings.Split(string(cmd), " ")[0]
 	basePath = fmt.Sprintf("/Users/%s/Desktop/bind", currentUser)
 }
+
 
 // makes sure we have our working dir to place all our files
 func ensureBindDirs() error {

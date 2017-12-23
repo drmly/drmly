@@ -23,14 +23,13 @@ func InitializeServer(host string) (server *network.WebServer) {
 	rand.Seed(time.Now().UTC().UnixNano())
 	// Make sure folders exist that we want:
 	if err := ensureBindDirs(); err != nil {
-		Log.Error("Failed to have home working dir to put the files into at ~/Desktop/bind, suxx", err)
+		Log.Error("Failed to have home working dir to put the files into at ~/Desktop/bind, err: ", err)
 	} else {
 		Log.Info("bind dirs ensured!")
 	}
 	if os.Args[0] != "d" { //development mode
-		Log.Info("debug mode")
 		gin.SetMode(gin.ReleaseMode)
-	}
+	} 
 	r := gin.New()
 	r.LoadHTMLGlob("public/tmpl/*.html")
 	r.StaticFS("/videos", http.Dir(basePath+"/videos"))
@@ -48,8 +47,10 @@ func InitializeServer(host string) (server *network.WebServer) {
 	r.GET("/openvideos", func(c *gin.Context) {
 		open.Run(basePath + "/videos")
 	})
-
 	r.GET("/openlogs", func(c *gin.Context) {
+		open.Run(basePath + "/logs")
+	})
+	r.GET("/toggleClipYt", func(c *gin.Context) {
 		open.Run(basePath + "/logs")
 	})
 

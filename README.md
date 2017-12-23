@@ -35,6 +35,9 @@ ffprobe (probably installed along with ffmpeg)
 
 [go](https://golang.org/)
 
+Optional requirements:
+
+[youtube-dl](https://rg3.github.io/youtube-dl)
 
 ----------
 Installation:
@@ -81,7 +84,7 @@ download https://ngrok.com/download  -> start it with:
 OSX tensorflow-gpu installation guide...(WIP) 
 ------------------
 
-The best place to start is to find and install the perfect .whl for your OS version (10.12, 10.11, 10.9, etc...), and install CUDA and Cudnn after that.  That's because every .whl you find out there is going to have different Cuda and Cudnn versions that it wants. Why not install from source? It's slow and unnecessary to be building the .whl yourself from source (which is what most articles focus on).
+The best place to start is to find and install the perfect .whl for your OS version (10.12, 10.11, 10.9, etc...), and install CUDA and Cudnn after that.  That's because every .whl you find out there is going to have different Cuda and Cudnn versions that it wants. Why not install from source? It's slow and unnecessary to be building the .whl yourself from source (which is what most articles focus on). Also, be aware that you'll be wanting to use a .whl that supports your Cuda Compute Capability, in my case I'm running a Geforce 650M which has a 3.0 Cuda Compute Capability
 
 OK, so here's what worked for me (I personally am running osx 10.12 and used this setup to get GPU working):
 
@@ -95,13 +98,14 @@ also [looking at this guide](https://metakermit.com/2017/compiling-tensorflow-wi
 
 you shouldn't get any rpath libcudart8.0.0.dylib Image not found errors (or similar errors). If you do [let us know](https://github.com/dreamlyteam/bind/issues/new)
 
-Also, be aware that you'll be wanting to use a .whl that supports your Cuda Compute Capability, in my case I'm running a Geforce 
 
 If alls well when you run 
 
-`python3 test.py`
+`python3 test.py` (test.py is located within this github projec)
 
-then you are running TF on a mac GPU, impressive! I'm not sure the speedup improvement is massive, it may just be modest, so if this doesn't work easily, I'd recommend reverting back to the CPU wheel choices presented near the top of this README.
+then you are running TF on a mac GPU, impressive! 
+
+***If this doesn't work easily, I'd recommend reverting back to the CPU wheel choices presented near the top of this README.
 
 [Improve this guide](https://github.com/dreamlyteam/bind/issues/new)
 
@@ -129,10 +133,10 @@ Roadmap
 
 
 ------------------
-Donations accepted,
+Danke
 ------------------
 
- send me an email, just decrypt my email address first: ∂®´åµ¬¥†´åµ™©µåˆ¬≥çøµ 
+my (encrypted) email address: ∂®´åµ¬¥†´åµ™©µåˆ¬≥çøµ 
  
 LTC:
  Lfoa64kkZS9gDihVA9PEQY46NjUvhZBs9p
@@ -142,11 +146,6 @@ BTC:
 
 BCH:
 18tvu2tf6ZcFKEFDP26Q5gBmNa5d62q9jM
-
-ETH:
-0x876b28d1aB248A9E05D7a2ef904095987c83E516
-
-
 
 Venmo:
 https://venmo.com/Tim-Bone
