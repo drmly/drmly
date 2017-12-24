@@ -86,13 +86,13 @@ OSX tensorflow-gpu installation guide...(WIP)
 
 The best place to start is to find and install the perfect .whl for your OS version (10.12, 10.11, 10.9, etc...), and install CUDA and Cudnn after that.  That's because every .whl you find out there is going to have different Cuda and Cudnn versions that it wants. Why not install from source? It's slow and unnecessary to be building the .whl yourself from source (which is what most articles focus on). Also, be aware that you'll be wanting to use a .whl that supports your Cuda Compute Capability, in my case I'm running a Geforce 650M which has a 3.0 Cuda Compute Capability
 
-OK, so here's what worked for me (I personally am running osx 10.12 and used this setup to get GPU working):
+So, here's what worked for me (I personally am running osx 10.12 and used this setup to get GPU working):
 
 I used this wheel:
 
 sudo pip install --upgrade https://github.com/bodak/tensorflow-wheels/releases/download/v1.1.0/tensorflow-1.1.0_GPU-cp36-cp36m-macosx_10_7_x86_64.whl
 
-ok, now as we can see from that [github page](https://github.com/bodak/tensorflow-wheels/releases), we need a specific CUDA and Cudnn versions, 8.0 and 5.1 respectively.
+Now, as we can see from that [github page](https://github.com/bodak/tensorflow-wheels/releases), we need a specific CUDA and Cudnn versions, 8.0 and 5.1 respectively.
 
 also [looking at this guide](https://metakermit.com/2017/compiling-tensorflow-with-gpu-support-on-a-macbook-pro/) you'll see some environmental variables are likely needing to be set, maybe just DYLD_LIBRARY_PATH(I think) 
 
@@ -131,21 +131,10 @@ Roadmap
 
 √ Explore creative approaches to using ML in art
 
+√ Releases (using pyinstaller to build TF. Also using daemon.go to run on demand)
 
-------------------
-Danke
-------------------
+√ Integrate social features 
 
-my (encrypted) email address: ∂®´åµ¬¥†´åµ™©µåˆ¬≥çøµ 
- 
-LTC:
- Lfoa64kkZS9gDihVA9PEQY46NjUvhZBs9p
-
-BTC:
-16bfdgzL5st8bVPGV2JCerkgSAMXNuciEE
-
-BCH:
-18tvu2tf6ZcFKEFDP26Q5gBmNa5d62q9jM
-
-Venmo:
-https://venmo.com/Tim-Bone
+√ Sound? (see code at: 
+https://github.com/ibab/tensorflow-wavenet
+)

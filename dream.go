@@ -13,12 +13,19 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/skratchdot/open-golang/open"
 )
+type dream struct {
+	*gin.Context
+}
 
-var isJob bool
 var basePath string
 
 // Dream is exported so it can be an api, haha what fun. Games perhaps? Stock trading? Some real time video effect?
 func Dream(c *gin.Context) {
+	start:=time.Now()
+	defer func() {
+		elapsed:= time.Since(start)
+		Log.Info("job took ", elapsed)
+	}()
 	yt := c.PostForm("yt")
 	fps := c.PostForm("fps")
 	ov := c.PostForm("ov") //data the user uploaded we want
@@ -35,10 +42,6 @@ func Dream(c *gin.Context) {
 	iw := c.PostForm("iw")
 	rle := c.PostForm("rle")
 	// stretch:=c.Postform("stretchvideo")
-	isJob = true
-	defer func() {
-		isJob = false
-	}()
 
 	Log.WithFields(logrus.Fields{
 		"event": "new job started",
@@ -59,7 +62,7 @@ func Dream(c *gin.Context) {
 
 	Log.Info("base path is ", basePath)
 
-	newJob(name)
+	newJobLog(name)
 	//let's save interesting job metadata for the user in a tidy format (err logs, srv logs kept with the binary or maybe put in bind dir? wip)
 	jobLog.WithFields(logrus.Fields{
 		"fps":                         fps,
@@ -178,7 +181,6 @@ func Dream(c *gin.Context) {
 	itsAVideo := false
 	// decide what to do with the file we've gotten, if it's an image:
 	if  ext == "png"{ //it's perfect, leave it alone...
-		
 	} else if ext == "jpg" || ext == "jpeg" {
 		cmd, err := exec.Command("ffmpeg", "-i", uploadedFile, framesDirPath+"/"+name+".png").CombinedOutput()
 		if err != nil {
@@ -229,6 +231,7 @@ func Dream(c *gin.Context) {
 	if oo == "oo" {
 		open.Run(outputPath)
 	}
+
 	if itsAVideo {
 		// create  frames from mp4
 		framesOut := fmt.Sprintf("%s/frames/%s/%s.png", basePath, name, "%d")
@@ -241,7 +244,7 @@ func Dream(c *gin.Context) {
 		}
 	}
 
-	Log.Info("entering dreamer goroutine")
+	Log.Info("entering python folder.py")
 	// deep dream the frames
 	cmd, err := exec.Command("python3", "folder.py", "--input", framesDirPath, "-it", it, "-oc", oc, "-la", la, "-rl", rl, "-rle", rle, "-li", li, "-iw", iw, "-ow", ow).CombinedOutput()
 	if err != nil {
@@ -250,7 +253,7 @@ func Dream(c *gin.Context) {
 		}).Error("failed to dream", err)
 		c.String(200, "Abort, this app is crashing, can't dream")
 	}
-	Log.Info("done w/ dream loop, python said: ", string(cmd))
+	Log.Info("done w/ folder.py, python said: ", string(cmd))
 
 	// put frames together into an mp4 in videos dir
 	newVideo := fmt.Sprintf("%s/videos/%s", basePath, name+".mp4")
@@ -306,4 +309,95 @@ func Dream(c *gin.Context) {
 	// 	}
 	// 	// todo remove newVideo, so we only save one w/ audio
 	// }
+}
+func (d *dream) saveFile()  {
+	var uploadedFile, framesDirPath string
+	var name, fullName string
+	if d.PostForm("yt") != "" { //if "yt" checkbox checked
+		youtubeDl := goydl.NewYoutubeDl()
+		for { //we loop until we got an acceptable ytURL
+			fmt.Println("waiting...")
+			youtubeDl.VideoURL = ytURL
+			fmt.Println("videoURL:", ytURL)
+			if ytURL == "" { //we didn't get a url, so just cancel the job
+				Log.Info("the url was blank (therefore no good ytURL yet), so just cancel the job")
+				return
+			}
+			info, err := youtubeDl.GetInfo()
+			if err != nil {
+				Log.WithFields(logrus.Fields{
+					"event": "ytdl",
+					"error": err,
+				}).Error("we should never fail here")
+				continue
+			}
+			fmt.Println(youtubeDl.VideoURL, "blah")
+			name = strings.Split(info.Title, " ")[0]
+			fullName = name + ".mp4"
+			if alreadyHave(basePath + "/frames/" + name) {
+				name = renamer(name)
+				fullName = name + ".mp4"
+				Log.Info("\nwe renamed as: ", fullName)
+			}
+			uploadedFile := fmt.Sprintf("%s/frames/%s/%s.mp4", basePath, name, name)
+			fmt.Println("uploaded file: ", uploadedFile)
+			youtubeDl.Options.Output.Value = uploadedFile
+			youtubeDl.Options.Format.Value = "mp4"
+			cmd, err := youtubeDl.Download(youtubeDl.VideoURL)
+			if err != nil {
+				Log.WithFields(logrus.Fields{
+					"event":        "error",
+					"err":          err,
+					"uploadedFile": uploadedFile,
+				}).Error("dl'ing from yt failed w err")
+			} else {
+				Log.WithFields(logrus.Fields{
+					"event": "download",
+					"path":  uploadedFile,
+				}).Info("downloaded a yt video")
+				println("starting download")
+				cmd.Wait()
+				println("finished download")
+
+				// make new folder for job
+				framesDirPath = fmt.Sprintf("%s/frames/%s", basePath, name)
+				if _, err := os.Stat(framesDirPath); os.IsNotExist(err) {
+					if err = os.Mkdir(framesDirPath, 0777); err != nil {
+						Log.Error("failed to make a new job dir w/ error: ", err)
+					}
+					Log.Info("frames folder for new job was created at ", framesDirPath)
+				}
+
+				break //we got our file, now we move on, we don't need to keep listening for URL
+			}
+		}
+	} else { // if no youtube, then get file from form upload
+		file, err := d.FormFile("file")
+		if err != nil {
+			Log.Error("failed to get file", err) //although this might not be an error as we support ytdl now
+			return
+		}
+		name = strings.Split(file.Filename, ".")[0]
+		fullName = file.Filename
+
+		if alreadyHave(basePath + "/frames/" + name) {
+			name = renamer(name)
+			fullName = name + "." + strings.Split(file.Filename, ".")[1]
+			Log.Info("\nwe renamed as: ", fullName)
+		}
+		// make new folder for job
+		framesDirPath = fmt.Sprintf("%s/frames/%s", basePath, name)
+		if _, err := os.Stat(framesDirPath); os.IsNotExist(err) {
+			if err = os.Mkdir(framesDirPath, 0777); err != nil {
+				Log.Error("failed to make a new job dir w/ error: ", err)
+			}
+			Log.Info("frames folder for new job was created at ", framesDirPath)
+		}
+		uploadedFile = fmt.Sprintf("%s/%s", framesDirPath, fullName)
+		if err := d.SaveUploadedFile(file, uploadedFile); err != nil {
+			Log.Error("failed to save file at path ", uploadedFile, " err is: ", err)
+		} else {
+			Log.Info("saved file at path ", uploadedFile)
+		}
+	}
 }

@@ -80,3 +80,10 @@
 [[constraint]]
   branch = "master"
   name = "github.com/tjgq/clipboard"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/turnage/graw"
+[[constraint]]
+  branch = "master"
+  name = 	"github.com/olahol/melody"

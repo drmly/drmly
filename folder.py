@@ -1,9 +1,8 @@
 # coding: UTF-8
 
-#some ideas and code taken  from : https://github.com/hjptriplebee huangjipengnju@gmail.com
+#based on tensorflow/example/tutorials deepdream
+#some ideas and code taken from : https://github.com/hjptriplebee huangjipengnju@gmail.com
 
-# also based on tensorflow/example/tutorials deepdream
-# and minor tweaks done for bind by dreamlyteam@gmail.com
 
 
 import os
