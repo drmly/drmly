@@ -11,6 +11,9 @@ import (
 var ytURL string //we use a seperate chan so we can filter out and ignore bad URL's ytdl can't download
 
 func init() {
+	if _,err:= exec.LookPath("youtube-dl"); err!= nil {
+		return //we're don't have youtube-dl so disable this feature
+	}
 	ytChan := make(chan string, 1)
 	go func() {
 		for {

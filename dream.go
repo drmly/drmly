@@ -14,7 +14,6 @@ import (
 	"github.com/skratchdot/open-golang/open"
 )
 
-var isJob bool
 var basePath string
 
 // Dream is exported so it can be an api, haha what fun. Games perhaps? Stock trading? Some real time video effect?
@@ -35,10 +34,6 @@ func Dream(c *gin.Context) {
 	iw := c.PostForm("iw")
 	rle := c.PostForm("rle")
 	// stretch:=c.Postform("stretchvideo")
-	isJob = true
-	defer func() {
-		isJob = false
-	}()
 
 	Log.WithFields(logrus.Fields{
 		"event": "new job started",
