@@ -1,4 +1,4 @@
-Bind is in early development! There are many rough edges. File issues for any bugs you find.
+Bind is in early development! There are many rough edges. File issues for any bugs you find. Also, since I'm on a mac I've been testing on a mac, thus, if you're on linux or windows, please let me know if you get any errors, because they should be easily fixed and I'd really like you to be able to make cool images/videos! 
 
 ![Alt Text](bg.png?raw=true "will")
 ----------
@@ -22,6 +22,8 @@ possible shortcuts to get an optimized tensorflow installation:
 some whl's for tensorflow here:
 https://github.com/lakshayg/tensorflow-build
 and more to be found at http://ci.tensorflow.org
+
+[cv2](https://duckduckgo.com/?q=install+cv2&ia=qa)
 
 [ffmpeg](https://ffmpeg.org/download.html)
 
@@ -136,16 +138,4 @@ Roadmap
 Danke
 ------------------
 
-my (encrypted) email address: ∂®´åµ¬¥†´åµ™©µåˆ¬≥çøµ 
- 
-LTC:
- Lfoa64kkZS9gDihVA9PEQY46NjUvhZBs9p
-
-BTC:
-16bfdgzL5st8bVPGV2JCerkgSAMXNuciEE
-
-BCH:
-18tvu2tf6ZcFKEFDP26Q5gBmNa5d62q9jM
-
-Venmo:
-https://venmo.com/Tim-Bone
+https://twitter.com/timboneyo

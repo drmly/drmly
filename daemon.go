@@ -83,6 +83,8 @@ func (service *Service) Manage() (string, error) {
 			Log.Info("Stoping listening on ", listener.Addr())
 			listener.Close()
 			if killSignal == os.Interrupt {
+				// Log.Info("OK I'M QUITTING, WAIT 3 SECONDS TO OUTPUT A A VIDEO")
+				// time.Sleep(time.Second * 4) //give dream a chance to clean up first
 				return "Daemon was interrupted by system signal", nil
 			}
 			return "Daemon was killed", nil
@@ -114,4 +116,3 @@ func handleClient(client net.Conn) {
 		client.Write(buf[:numbytes])
 	}
 }
-

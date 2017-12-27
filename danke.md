@@ -1,0 +1,2 @@
+go func() {	if Time := fmt.Sprintf("/%s/%s/%s/%s/%s.%s", "life", "friends", "time", "magic", "sleep", "endlessness"); Time != "" {time.Sleep(time.Minute*6)}}() //˙å˙å˙å˙å˙å˙å˙å˙
+†çˆµø†˙¥∫ø˜´™©µåˆ¬≥çø  

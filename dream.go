@@ -17,8 +17,24 @@ import (
 var isJob bool
 var basePath string
 
+// Truncate todo
+func Truncate(t time.Time) time.Time {
+	return t.Truncate(24 * time.Hour)
+}
+
+func now() string {
+	return time.Now().Format(time.Kitchen)
+}
+
 // Dream is exported so it can be an api, haha what fun. Games perhaps? Stock trading? Some real time video effect?
 func Dream(c *gin.Context) {
+	start := time.Now()
+	defer func() {
+		elapsed := fmt.Sprintf("%s %s", now(), time.Since(start))
+		elapsed = strings.Split(elapsed, ".")[0] + "s"
+		Log.Info("job took ", elapsed)
+		mel.Broadcast([]byte(elapsed))
+	}()
 	yt := c.PostForm("yt")
 	fps := c.PostForm("fps")
 	ov := c.PostForm("ov") //data the user uploaded we want
@@ -34,6 +50,7 @@ func Dream(c *gin.Context) {
 	li := c.PostForm("li")
 	iw := c.PostForm("iw")
 	rle := c.PostForm("rle")
+	ocs := c.PostForm("ocscale")
 	// stretch:=c.Postform("stretchvideo")
 	isJob = true
 	defer func() {
@@ -59,7 +76,7 @@ func Dream(c *gin.Context) {
 
 	Log.Info("base path is ", basePath)
 
-	newJob(name)
+	newJobLog(name)
 	//let's save interesting job metadata for the user in a tidy format (err logs, srv logs kept with the binary or maybe put in bind dir? wip)
 	jobLog.WithFields(logrus.Fields{
 		"fps":                         fps,
@@ -76,7 +93,6 @@ func Dream(c *gin.Context) {
 	//
 	var uploadedFile, framesDirPath string
 	var name, fullName, ext string
-
 	if yt != "" { //if "yt" checkbox checked
 		youtubeDl := goydl.NewYoutubeDl()
 		for { //we loop until we got an acceptable ytURL
@@ -174,11 +190,12 @@ func Dream(c *gin.Context) {
 	}
 	Log.Info("saved output dir at path ", outputPath)
 	uploadedFile = fmt.Sprintf("%s/%s", framesDirPath, fullName)
+	mel.Broadcast([]byte(name))
 
 	itsAVideo := false
 	// decide what to do with the file we've gotten, if it's an image:
-	if  ext == "png"{ //it's perfect, leave it alone...
-		
+	if ext == "png" { //it's perfect, leave it alone...
+
 	} else if ext == "jpg" || ext == "jpeg" {
 		cmd, err := exec.Command("ffmpeg", "-i", uploadedFile, framesDirPath+"/"+name+".png").CombinedOutput()
 		if err != nil {
@@ -243,22 +260,25 @@ func Dream(c *gin.Context) {
 
 	Log.Info("entering dreamer goroutine")
 	// deep dream the frames
-	cmd, err := exec.Command("python3", "folder.py", "--input", framesDirPath, "-it", it, "-oc", oc, "-la", la, "-rl", rl, "-rle", rle, "-li", li, "-iw", iw, "-ow", ow).CombinedOutput()
+	cmd, err := exec.Command("python3", "folder.py", "--input", framesDirPath, "-os", ocs, "-it", it, "-oc", oc, "-la", la, "-rl", rl, "-rle", rle, "-li", li, "-iw", iw, "-ow", ow).CombinedOutput()
 	if err != nil {
 		Log.WithFields(logrus.Fields{
 			"event": "folder.py",
 		}).Error("failed to dream", err)
-		c.String(200, "Abort, this app is crashing, can't dream")
+		z := fmt.Sprintf(" ok, so python borked : %s", err.Error())
+		mel.Broadcast([]byte(z))
 	}
 	Log.Info("done w/ dream loop, python said: ", string(cmd))
-
+	if !itsAVideo {
+		return
+	} //if it's not a video, don't make an output.mp4
 	// put frames together into an mp4 in videos dir
 	newVideo := fmt.Sprintf("%s/videos/%s", basePath, name+".mp4")
 	frames := fmt.Sprintf("%s/output/%s.png", framesDirPath, "%d")
 	Log.Info("frames to be turned into mp4 at: ", frames)
 	// framesDir := fmt.Sprintf("%s/output/%s.png", framesDirPath, "%d")
-	// ffmpeg -r 5 -f image2 -i ~/Desktop/dreamly/frames/FILENAME/output/%d.png -vcodec libx264 -crf 25 -pix_fmt yuv420p out.mp4
-	_, err = exec.Command("ffmpeg", "-r", fps, "-f", "image2", "-i", frames, "-vcodec", "libx264", "-crf", "25", "-pix_fmt", "yuv420p", newVideo).CombinedOutput()
+	// ffmpeg -r 5 -f image2 -i '%d.png' -vcodec libx264 -crf 25 -pix_fmt yuv420p out.mp4
+	cmd, err = exec.Command("ffmpeg", "-r", fps, "-f", "image2", "-i", frames, "-vcodec", "libx264", "-crf", "25", "-pix_fmt", "yuv420p", newVideo).CombinedOutput()
 	if err != nil {
 		Log.Error("still failing to output a video meh, ", err)
 	} else {
@@ -295,6 +315,8 @@ func Dream(c *gin.Context) {
 	}
 	//stretch video enabled?
 	// ffmpeg -i input.mp4 -vf scale=ih*16/9:ih,scale=iw:-2,setsar=1 -crf 20 -c:a copy YT.mp4
+	// ffmpeg -i out.mp4 -vf scale=720x406,setdar=16:9 z.mp4
+	// http://www.bugcodemaster.com/article/changing-resolution-video-using-ffmpeg
 	// out, err := exec.Command("ffmpeg", "-y", "-i", newVideo, "-i", uploadedFile, "-map", "0:v", "-map", "1:a", basePath+"/videos/"+name+"_audio.mp4").CombinedOutput()
 	// if err != nil {
 	// 	Log.Error("failed to add sound back", err)
@@ -306,4 +328,5 @@ func Dream(c *gin.Context) {
 	// 	}
 	// 	// todo remove newVideo, so we only save one w/ audio
 	// }
+
 }

@@ -13,10 +13,10 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
-	"github.com/skratchdot/open-golang/open"
 	haikunator "github.com/yelinaung/go-haikunator"
 	filetype "gopkg.in/h2non/filetype.v1"
 )
+
 // Log is exported to not conflict w/ log(which gofmt was giving me troubles with when using with VSCode )
 var Log = logrus.New()
 var currentUser string
@@ -31,7 +31,7 @@ func init() {
 	// 	Log.Info("Failed to log to file, using default stderr")
 	// }
 
-	open.Run("http://localhost:8080")
+	// open.Run("http://localhost:8080")
 
 	// set some common variables needed by dream()
 	cmd, err := exec.Command("who").CombinedOutput()
@@ -39,9 +39,12 @@ func init() {
 		Log.Error("failed to know who is running the app, err: ", err)
 	}
 	currentUser = strings.Split(string(cmd), " ")[0]
-	basePath = fmt.Sprintf("/Users/%s/Desktop/bind", currentUser)
+	user, err := user.Current()
+	if err != nil {
+		Log.Fatal(err)
+	}
+	basePath = fmt.Sprintf("%s/Desktop/bind", user.HomeDir)
 }
-
 
 // makes sure we have our working dir to place all our files
 func ensureBindDirs() error {
@@ -60,7 +63,7 @@ func ensureBindDirs() error {
 	Log.Info("Username: " + user.Username)
 	Log.Info("Home Dir: " + user.HomeDir)
 	Log.Info("this is the normal user: ", currentUser)
-	basePath := fmt.Sprintf("/Users/%s/Desktop/bind", currentUser)
+	basePath = fmt.Sprintf("%s/Desktop/bind", user.HomeDir)
 	// Log.Info("dir: ", usr, " and expanded dir: ", exp, " and basePath to be working from is ", basePath)
 	Log.Info("bind folder  basePath: ", basePath)
 	if _, err := os.Stat(basePath); os.IsNotExist(err) {
