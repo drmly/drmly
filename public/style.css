@@ -1,0 +1,16 @@
+/* global font style */
+body,input{
+	font: 1em consolas,monospace
+}
+
+/* styling for chat pane box */
+#chatpane{
+	background: #dbdbdb;
+	border: 1px solid #7f7f7f;
+
+	width: 500px;
+	min-height: 300px;
+
+	text-align: left;
+	padding: 20px
+}

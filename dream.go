@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"os/signal"
 	"strings"
+	"syscall"
 	"time"
 
 	"github.com/TableMountain/goydl"
@@ -19,6 +21,13 @@ var basePath string
 
 // Dream is exported so it can be an api, haha what fun. Games perhaps? Stock trading? Some real time video effect?
 func Dream(c *gin.Context) {
+	mel.Broadcast([]byte("haha"))
+	start := time.Now()
+	defer func() {
+		elapsed := fmt.Sprintf("%s",time.Since(start))
+		Log.Info("job took ", elapsed)
+		mel.Broadcast([]byte(elapsed))
+	}()
 	yt := c.PostForm("yt")
 	fps := c.PostForm("fps")
 	ov := c.PostForm("ov") //data the user uploaded we want
@@ -59,7 +68,7 @@ func Dream(c *gin.Context) {
 
 	Log.Info("base path is ", basePath)
 
-	newJob(name)
+	newJobLog(name)
 	//let's save interesting job metadata for the user in a tidy format (err logs, srv logs kept with the binary or maybe put in bind dir? wip)
 	jobLog.WithFields(logrus.Fields{
 		"fps":                         fps,
@@ -177,8 +186,8 @@ func Dream(c *gin.Context) {
 
 	itsAVideo := false
 	// decide what to do with the file we've gotten, if it's an image:
-	if  ext == "png"{ //it's perfect, leave it alone...
-		
+	if ext == "png" { //it's perfect, leave it alone...
+
 	} else if ext == "jpg" || ext == "jpeg" {
 		cmd, err := exec.Command("ffmpeg", "-i", uploadedFile, framesDirPath+"/"+name+".png").CombinedOutput()
 		if err != nil {
@@ -240,6 +249,76 @@ func Dream(c *gin.Context) {
 			Log.Info("made frames from MP4 with cmd: ", string(cmd))
 		}
 	}
+	interrupt := make(chan os.Signal, 1)
+	signal.Notify(interrupt, os.Interrupt, os.Kill, syscall.SIGTERM)
+	go func() {
+		select {
+		case killSignal := <-interrupt:
+			Log.Info("Got signal:", killSignal)
+			if killSignal == os.Interrupt {
+				break
+			}
+		}
+		defer func() { //this way even on os.exit we still make our video (hacky, but then we can quit jobs early)
+			if !itsAVideo {return}//if it's not a video, don't make an output.mp4 
+			// put frames together into an mp4 in videos dir
+			newVideo := fmt.Sprintf("%s/videos/%s", basePath, name+".mp4")
+			frames := fmt.Sprintf("%s/output/%s.png", framesDirPath, "%d")
+			Log.Info("frames to be turned into mp4 at: ", frames)
+			// framesDir := fmt.Sprintf("%s/output/%s.png", framesDirPath, "%d")
+			// ffmpeg -r 5 -f image2 -i '%d.png' -vcodec libx264 -crf 25 -pix_fmt yuv420p out.mp4
+			_, err := exec.Command("ffmpeg", "-r", fps, "-f", "image2", "-i", frames, "-vcodec", "libx264", "-crf", "25", "-pix_fmt", "yuv420p", newVideo).CombinedOutput()
+			if err != nil {
+				Log.Error("still failing to output a video meh, ", err)
+			} else {
+				Log.Info("\nmade mp4 from frames")
+			}
+			if ov == "ov" {
+				open.Run(basePath + "/videos")
+			}
+
+			//  is there sound?
+			audio, err := exec.Command("ffprobe", uploadedFile, "-show_streams", "-select_streams", "a", "-loglevel", "error").CombinedOutput()
+			if err != nil {
+				Log.Error("Failed to test audio, ", err)
+			}
+			// add sound back in if there is any
+			// ffmpeg -i 2171447000212516064.mp4 -i gold.mp4  -map 0:v -map 1:a output.mp4
+			if len(audio) > 1 {
+				Log.Info("there's sound in this clip")
+				out, err := exec.Command("ffmpeg", "-y", "-i", newVideo, "-i", uploadedFile, "-map", "0:v", "-map", "1:a", basePath+"/videos/audio_"+name+".mp4").CombinedOutput()
+				if err != nil {
+					Log.Error("failed to add sound back", err)
+				} else {
+					Log.Info("fffmpeg added sound:", string(out))
+					if ovf == "ovf" {
+						open.Run(basePath + "/videos/audio_" + name + ".mp4")
+					}
+					// todo remove newVideo, so we only save one video, the one w/ audio
+				}
+			} else {
+				Log.Info("there's no sound")
+				if ovf == "ovf" {
+					open.Run(newVideo)
+				}
+			}
+			//stretch video enabled?
+			// ffmpeg -i input.mp4 -vf scale=ih*16/9:ih,scale=iw:-2,setsar=1 -crf 20 -c:a copy YT.mp4
+			// ffmpeg -i out.mp4 -vf scale=720x406,setdar=16:9 z.mp4
+			// http://www.bugcodemaster.com/article/changing-resolution-video-using-ffmpeg
+			// out, err := exec.Command("ffmpeg", "-y", "-i", newVideo, "-i", uploadedFile, "-map", "0:v", "-map", "1:a", basePath+"/videos/"+name+"_audio.mp4").CombinedOutput()
+			// if err != nil {
+			// 	Log.Error("failed to add sound back", err)
+			// } else {
+			// 	Log.Info("fffmpeg added sound:", string(out))
+			// 	os.Remove(newVideo) //remove video w/o sound, we don't need it
+			// 	if ovf == "ovf" {
+			// 		open.Run(basePath + "/videos/" + name + "_audio.mp4")
+			// 	}
+			// 	// todo remove newVideo, so we only save one w/ audio
+			// }
+		}()
+	}()
 
 	Log.Info("entering dreamer goroutine")
 	// deep dream the frames
@@ -252,58 +331,4 @@ func Dream(c *gin.Context) {
 	}
 	Log.Info("done w/ dream loop, python said: ", string(cmd))
 
-	// put frames together into an mp4 in videos dir
-	newVideo := fmt.Sprintf("%s/videos/%s", basePath, name+".mp4")
-	frames := fmt.Sprintf("%s/output/%s.png", framesDirPath, "%d")
-	Log.Info("frames to be turned into mp4 at: ", frames)
-	// framesDir := fmt.Sprintf("%s/output/%s.png", framesDirPath, "%d")
-	// ffmpeg -r 5 -f image2 -i ~/Desktop/dreamly/frames/FILENAME/output/%d.png -vcodec libx264 -crf 25 -pix_fmt yuv420p out.mp4
-	_, err = exec.Command("ffmpeg", "-r", fps, "-f", "image2", "-i", frames, "-vcodec", "libx264", "-crf", "25", "-pix_fmt", "yuv420p", newVideo).CombinedOutput()
-	if err != nil {
-		Log.Error("still failing to output a video meh, ", err)
-	} else {
-		Log.Info("\nmade mp4 from frames")
-	}
-	if ov == "ov" {
-		open.Run(basePath + "/videos")
-	}
-
-	//  is there sound?
-	audio, err := exec.Command("ffprobe", uploadedFile, "-show_streams", "-select_streams", "a", "-loglevel", "error").CombinedOutput()
-	if err != nil {
-		Log.Error("Failed to test audio, ", err)
-	}
-	// add sound back in if there is any
-	// ffmpeg -i 2171447000212516064.mp4 -i gold.mp4  -map 0:v -map 1:a output.mp4
-	if len(audio) > 1 {
-		Log.Info("there's sound in this clip")
-		out, err := exec.Command("ffmpeg", "-y", "-i", newVideo, "-i", uploadedFile, "-map", "0:v", "-map", "1:a", basePath+"/videos/audio_"+name+".mp4").CombinedOutput()
-		if err != nil {
-			Log.Error("failed to add sound back", err)
-		} else {
-			Log.Info("fffmpeg added sound:", string(out))
-			if ovf == "ovf" {
-				open.Run(basePath + "/videos/audio_" + name + ".mp4")
-			}
-			// todo remove newVideo, so we only save one video, the one w/ audio
-		}
-	} else {
-		Log.Info("there's no sound")
-		if ovf == "ovf" {
-			open.Run(newVideo)
-		}
-	}
-	//stretch video enabled?
-	// ffmpeg -i input.mp4 -vf scale=ih*16/9:ih,scale=iw:-2,setsar=1 -crf 20 -c:a copy YT.mp4
-	// out, err := exec.Command("ffmpeg", "-y", "-i", newVideo, "-i", uploadedFile, "-map", "0:v", "-map", "1:a", basePath+"/videos/"+name+"_audio.mp4").CombinedOutput()
-	// if err != nil {
-	// 	Log.Error("failed to add sound back", err)
-	// } else {
-	// 	Log.Info("fffmpeg added sound:", string(out))
-	// 	os.Remove(newVideo) //remove video w/o sound, we don't need it
-	// 	if ovf == "ovf" {
-	// 		open.Run(basePath + "/videos/" + name + "_audio.mp4")
-	// 	}
-	// 	// todo remove newVideo, so we only save one w/ audio
-	// }
 }

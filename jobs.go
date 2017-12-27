@@ -9,7 +9,7 @@ import (
 var maxJobs int
 var jobLog = logrus.New()
 
-func newJob(name string) {
+func newJobLog(name string) {
 	file, err := os.OpenFile(basePath+"/logs/"+name+".txt", os.O_CREATE|os.O_WRONLY, 0666)
 	if err == nil {
 		jobLog.Out = file
