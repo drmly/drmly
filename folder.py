@@ -38,29 +38,31 @@ def numericalSort(value):
     return parts
 
 
-layer_names = ['conv2d0', 'conv2d1', 'conv2d2',
-               'mixed3a', 'mixed3b',
-               'mixed4a', 'mixed4b', 'mixed4c', 'mixed4d', 'mixed4e',
-               'mixed5a', 'mixed5b']
+layer_names = ['conv2d0_pre_relu/conv', 'conv2d1_pre_relu/conv', 'conv2d2_pre_relu/conv', 'mixed3a_1x1_pre_relu/conv', 'mixed3a_3x3_bottleneck_pre_relu/conv', 'mixed3a_3x3_pre_relu/conv', 'mixed3a_5x5_bottleneck_pre_relu/conv', 'mixed3a_5x5_pre_relu/conv', 'mixed3a_pool_reduce_pre_relu/conv', 'mixed3b_1x1_pre_relu/conv', 'mixed3b_3x3_bottleneck_pre_relu/conv', 'mixed3b_3x3_pre_relu/conv', 'mixed3b_5x5_bottleneck_pre_relu/conv', 'mixed3b_5x5_pre_relu/conv', 'mixed3b_pool_reduce_pre_relu/conv', 'mixed4a_1x1_pre_relu/conv', 'mixed4a_3x3_bottleneck_pre_relu/conv', 'mixed4a_3x3_pre_relu/conv', 'mixed4a_5x5_bottleneck_pre_relu/conv', 'mixed4a_5x5_pre_relu/conv', 'mixed4a_pool_reduce_pre_relu/conv', 'mixed4b_1x1_pre_relu/conv', 'mixed4b_3x3_bottleneck_pre_relu/conv', 'mixed4b_3x3_pre_relu/conv', 'mixed4b_5x5_bottleneck_pre_relu/conv', 'mixed4b_5x5_pre_relu/conv', 'mixed4b_pool_reduce_pre_relu/conv', 'mixed4c_1x1_pre_relu/conv', 'mixed4c_3x3_bottleneck_pre_relu/conv', 'mixed4c_3x3_pre_relu/conv',
+               'mixed4c_5x5_bottleneck_pre_relu/conv', 'mixed4c_5x5_pre_relu/conv', 'mixed4c_pool_reduce_pre_relu/conv', 'mixed4d_1x1_pre_relu/conv', 'mixed4d_3x3_bottleneck_pre_relu/conv', 'mixed4d_3x3_pre_relu/conv', 'mixed4d_5x5_bottleneck_pre_relu/conv', 'mixed4d_5x5_pre_relu/conv', 'mixed4d_pool_reduce_pre_relu/conv', 'mixed4e_1x1_pre_relu/conv', 'mixed4e_3x3_bottleneck_pre_relu/conv', 'mixed4e_3x3_pre_relu/conv', 'mixed4e_5x5_bottleneck_pre_relu/conv', 'mixed4e_5x5_pre_relu/conv', 'mixed4e_pool_reduce_pre_relu/conv', 'mixed5a_1x1_pre_relu/conv', 'mixed5a_3x3_bottleneck_pre_relu/conv', 'mixed5a_3x3_pre_relu/conv', 'mixed5a_5x5_bottleneck_pre_relu/conv', 'mixed5a_5x5_pre_relu/conv', 'mixed5a_pool_reduce_pre_relu/conv', 'mixed5b_1x1_pre_relu/conv', 'mixed5b_3x3_bottleneck_pre_relu/conv', 'mixed5b_3x3_pre_relu/conv', 'mixed5b_5x5_bottleneck_pre_relu/conv', 'mixed5b_5x5_pre_relu/conv', 'mixed5b_pool_reduce_pre_relu/conv', 'head0_bottleneck_pre_relu/conv', 'head1_bottleneck_pre_relu/conv']
 no_conv = ['mixed3a', 'mixed3b',
            'mixed4a', 'mixed4b', 'mixed4c', 'mixed4d', 'mixed4e',
            'mixed5a', 'mixed5b']
 layer_conv = ['conv2d0', 'conv2d1', 'conv2d2']
 
+
 class Range(object):
     def __init__(self, start, end):
         self.start = start
         self.end = end
+
     def __eq__(self, other):
         return self.start <= other <= self.end
 
-    
+
 def define_args():
     """define args"""
     parser = argparse.ArgumentParser(description="deep_dream")
     parser.add_argument("-i", "--input", help="input path", default="none")
     parser.add_argument("-o", "--output", help="output path",
                         default="output/output.jpg")
+    parser.add_argument("-ch", "--channel",
+                        help="specify channel", default="4")
     parser.add_argument("-it", "--iterations",
                         help="specify iterations", default="4")
     parser.add_argument(
@@ -78,7 +80,7 @@ def define_args():
     parser.add_argument(
         "-ow", "--ocwaver", help="randomize the number of octaves up and down by this amount", default="0")
     parser.add_argument(
-        "-os", "--ocscale", help="specify the float of octaves scale", type=float, choices=[Range(0.1,4.0)], default="0")
+        "-os", "--ocscale", help="specify the float of octaves scale", type=float, choices=[Range(0.1, 4.0)], default="0")
     return parser.parse_args()
 
 
@@ -105,7 +107,9 @@ def deep_dream(model, output_path, input_image=noise):
     """implement of deep dream"""
     # define graph
     graph = tf.Graph()
-    sess = tf.InteractiveSession(graph=graph)
+    config = tf.ConfigProto()
+    config.gpu_options.allow_growth = True
+    sess = tf.InteractiveSession(graph=graph, config=config)
 
     # load model
     with tf.gfile.FastGFile(model, "rb") as f:
@@ -120,8 +124,8 @@ def deep_dream(model, output_path, input_image=noise):
     print("\n", iter_num, "\n")
 
     count = 1
-    output_count = len([name for name in os.listdir(
-        '.') if os.path.isfile(args.input + '/output')])
+    output_count = len([name for name in os.listdir('.')
+                        if os.path.isfile(args.input + '/output')])
     count = output_count + 1
     rl = str(args.randomlayer)
     rle = int(args.randomlayerevery)
@@ -144,8 +148,13 @@ def deep_dream(model, output_path, input_image=noise):
                 print("random layer choice is ", layer)
 
         # L2 and gradient
-        loss = tf.reduce_mean(
-            tf.square(graph.get_tensor_by_name("import/%s:0" % layer)))
+        channel = int(args.channel)
+
+        def T(layer):
+            '''Helper for getting layer output tensor'''
+            return graph.get_tensor_by_name("import/%s:0" % layer)
+        t_obj = T(layer)[:, :, :, channel]
+        loss = tf.reduce_mean(t_obj)
         gradient = tf.gradients(loss, X)[0]
         # increase iterations this run if doing linear increase
         if int(args.linear) > 0 and iter_num < 500:
@@ -197,6 +206,7 @@ def deep_dream(model, output_path, input_image=noise):
         def resize(image, size):
             """resize image in nparray"""
             image = tf.expand_dims(image, 0)
+            print("called resize with channel: ", args.channel)
             return tf.image.resize_bilinear(image, size)[0, :, :, :]
 
         resize = tffunc(np.float32, np.int32)(resize)
@@ -229,13 +239,14 @@ def deep_dream(model, output_path, input_image=noise):
             if i > 0:
                 # restore image except original image
                 diff = octaves[-i]
-                image = resize(image, diff.shape[:2]) + diff
+                image = resize(image, diff.shape[: 2]) + diff
             for j in range(iter_num):
                 # gradient ascent
                 g_ = cal_gradient(image, gradient)
                 # large learning rate for small g_
                 image += g_ * (learning_rate / (np.abs(g_).mean() + 1e-7))
         cv2.imwrite(output_path, image)
+        sess.close()
 
 
 if __name__ == "__main__":

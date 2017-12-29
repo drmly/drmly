@@ -51,6 +51,7 @@ func Dream(c *gin.Context) {
 	iw := c.PostForm("iw")
 	rle := c.PostForm("rle")
 	ocs := c.PostForm("ocscale")
+	ch := c.PostForm("ch")
 	// stretch:=c.Postform("stretchvideo")
 	isJob = true
 	defer func() {
@@ -246,6 +247,7 @@ func Dream(c *gin.Context) {
 	if oo == "oo" {
 		open.Run(outputPath)
 	}
+
 	if itsAVideo {
 		// create  frames from mp4
 		framesOut := fmt.Sprintf("%s/frames/%s/%s.png", basePath, name, "%d")
@@ -257,21 +259,25 @@ func Dream(c *gin.Context) {
 			Log.Info("made frames from MP4 with cmd: ", string(cmd))
 		}
 	}
-
+	Log.Info("ch is : ", ch)
 	Log.Info("entering dreamer goroutine")
 	// deep dream the frames
-	cmd, err := exec.Command("python3", "folder.py", "--input", framesDirPath, "-os", ocs, "-it", it, "-oc", oc, "-la", la, "-rl", rl, "-rle", rle, "-li", li, "-iw", iw, "-ow", ow).CombinedOutput()
+	cmd, err := exec.Command("python3", "folder.py", "--input", framesDirPath, "-ch", ch, "-os", ocs, "-it", it, "-oc", oc, "-la", la, "-rl", rl, "-rle", rle, "-li", li, "-iw", iw, "-ow", ow).CombinedOutput()
 	if err != nil {
 		Log.WithFields(logrus.Fields{
 			"event": "folder.py",
 		}).Error("failed to dream", err)
-		z := fmt.Sprintf(" ok, so python borked : %s", err.Error())
+		z := fmt.Sprintf("FAIL: python borked: %s", err.Error())
 		mel.Broadcast([]byte(z))
 	}
 	Log.Info("done w/ dream loop, python said: ", string(cmd))
 	if !itsAVideo {
-		return
-	} //if it's not a video, don't make an output.mp4
+		_, err := exec.Command("ffmpeg", "-i", outputPath+"/1.png", outputPath+"/1.jpg").CombinedOutput()
+		if err != nil {
+			Log.Error("failed to jpg the png", err)
+		}
+		return //if it's not a video, don't make an output.mp4
+	}
 	// put frames together into an mp4 in videos dir
 	newVideo := fmt.Sprintf("%s/videos/%s", basePath, name+".mp4")
 	frames := fmt.Sprintf("%s/output/%s.png", framesDirPath, "%d")

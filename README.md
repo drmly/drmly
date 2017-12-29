@@ -138,4 +138,8 @@ Roadmap
 Danke
 ------------------
 
-https://twitter.com/timboneyo
+How to contact the humans attempting to automate the tediousness of dd, make it fun, accessible and arty? 
+
+dreamly followed by team, all one word, and it's at that place where people search for stuff, gee, now that I think about it, it's like email.com but uh gee...umm...
+
+Are you an artist looking to use dd to do art? I want to help you! Please contact me about your project.

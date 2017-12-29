@@ -30,8 +30,8 @@ func init() {
 	// } else {
 	// 	Log.Info("Failed to log to file, using default stderr")
 	// }
-
 	// open.Run("http://localhost:8080")
+	Log.Info("click this: http://localhost:8080")
 
 	// set some common variables needed by dream()
 	cmd, err := exec.Command("who").CombinedOutput()

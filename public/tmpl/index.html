@@ -143,19 +143,70 @@
                         <div title="tf uses different layers to alter the affect on the ml algo">
                             layer choice:
                             <select autofocus id="layer" name="layer">
-                                <option value='mixed3a' selected>mixed3a maze</option>
-                                <option value='mixed3b'>mixed3b swirls</option>
-                                <option value='mixed4a'>mixed4a eyes</option>
-                                <option value='mixed4b'>mixed4b dogs</option>
-                                <option value='mixed4c'>mixed4c sick</option>
-                                <option value='mixed4d'>mixed4d peacock</option>
-                                <option value='mixed4e'>mixed4e chalice</option>
-                                <option value='mixed5a'>mixed5a</option>
-                                <option value='mixed5b'>mixed5b wavy</option>
-                                <option value='conv2d0'>conv2d0 blur</option>
-                                <option value='conv2d1'>conv2d1 neon</option>
-                                <option value='conv2d2'>conv2d2 tapestry</option>
+                                <option value='conv2d0_pre_relu/conv'>conv2d0_pre_relu/conv 63 </option>
+                                <option value='conv2d1_pre_relu/conv'>conv2d1_pre_relu/conv 63 </option>
+                                <option value='conv2d2_pre_relu/conv'>conv2d2_pre_relu/conv 191 </option>
+                                <option value='mixed3a_1x1_pre_relu/conv'>mixed3a_1x1_pre_relu/conv 63 </option>
+                                <option value='mixed3a_3x3_bottleneck_pre_relu/conv'>mixed3a_3x3_bottleneck_pre_relu/conv 95 </option>
+                                <option value='mixed3a_3x3_pre_relu/conv'>mixed3a_3x3_pre_relu/conv 127 </option>
+                                <option value='mixed3a_5x5_bottleneck_pre_relu/conv'>mixed3a_5x5_bottleneck_pre_relu/conv 15 </option>
+                                <option value='mixed3a_5x5_pre_relu/conv'>mixed3a_5x5_pre_relu/conv 31 </option>
+                                <option value='mixed3a_pool_reduce_pre_relu/conv'>mixed3a_pool_reduce_pre_relu/conv 31 </option>
+                                <option value='mixed3b_1x1_pre_relu/conv'>mixed3b_1x1_pre_relu/conv 127 </option>
+                                <option value='mixed3b_3x3_bottleneck_pre_relu/conv'>mixed3b_3x3_bottleneck_pre_relu/conv 127 </option>
+                                <option value='mixed3b_3x3_pre_relu/conv'>mixed3b_3x3_pre_relu/conv 191 </option>
+                                <option value='mixed3b_5x5_bottleneck_pre_relu/conv'>mixed3b_5x5_bottleneck_pre_relu/conv 31 </option>
+                                <option value='mixed3b_5x5_pre_relu/conv'>mixed3b_5x5_pre_relu/conv 95 </option>
+                                <option value='mixed3b_pool_reduce_pre_relu/conv'>mixed3b_pool_reduce_pre_relu/conv 63 </option>
+                                <option value='mixed4a_1x1_pre_relu/conv'>mixed4a_1x1_pre_relu/conv 191 </option>
+                                <option value='mixed4a_3x3_bottleneck_pre_relu/conv'>mixed4a_3x3_bottleneck_pre_relu/conv 95 </option>
+                                <option value='mixed4a_3x3_pre_relu/conv'>mixed4a_3x3_pre_relu/conv 203 </option>
+                                <option value='mixed4a_5x5_bottleneck_pre_relu/conv'>mixed4a_5x5_bottleneck_pre_relu/conv 15 </option>
+                                <option value='mixed4a_5x5_pre_relu/conv'>mixed4a_5x5_pre_relu/conv 47 </option>
+                                <option value='mixed4a_pool_reduce_pre_relu/conv'>mixed4a_pool_reduce_pre_relu/conv 63 </option>
+                                <option value='mixed4b_1x1_pre_relu/conv'>mixed4b_1x1_pre_relu/conv 159 </option>
+                                <option value='mixed4b_3x3_bottleneck_pre_relu/conv'>mixed4b_3x3_bottleneck_pre_relu/conv 111 </option>
+                                <option value='mixed4b_3x3_pre_relu/conv'>mixed4b_3x3_pre_relu/conv 223 </option>
+                                <option value='mixed4b_5x5_bottleneck_pre_relu/conv'>mixed4b_5x5_bottleneck_pre_relu/conv 23 </option>
+                                <option value='mixed4b_5x5_pre_relu/conv'>mixed4b_5x5_pre_relu/conv 63 </option>
+                                <option value='mixed4b_pool_reduce_pre_relu/conv'>mixed4b_pool_reduce_pre_relu/conv 63 </option>
+                                <option value='mixed4c_1x1_pre_relu/conv'>mixed4c_1x1_pre_relu/conv 127 </option>
+                                <option value='mixed4c_3x3_bottleneck_pre_relu/conv'>mixed4c_3x3_bottleneck_pre_relu/conv 127 </option>
+                                <option value='mixed4c_3x3_pre_relu/conv'>mixed4c_3x3_pre_relu/conv 255 </option>
+                                <option value='mixed4c_5x5_bottleneck_pre_relu/conv'>mixed4c_5x5_bottleneck_pre_relu/conv 23 </option>
+                                <option value='mixed4c_5x5_pre_relu/conv'>mixed4c_5x5_pre_relu/conv 63 </option>
+                                <option value='mixed4c_pool_reduce_pre_relu/conv'>mixed4c_pool_reduce_pre_relu/conv 63 </option>
+                                <option value='mixed4d_1x1_pre_relu/conv'>mixed4d_1x1_pre_relu/conv 111 </option>
+                                <option value='mixed4d_3x3_bottleneck_pre_relu/conv'>mixed4d_3x3_bottleneck_pre_relu/conv 143 </option>
+                                <option value='mixed4d_3x3_pre_relu/conv'>mixed4d_3x3_pre_relu/conv 287 </option>
+                                <option value='mixed4d_5x5_bottleneck_pre_relu/conv'>mixed4d_5x5_bottleneck_pre_relu/conv 31 </option>
+                                <option value='mixed4d_5x5_pre_relu/conv'>mixed4d_5x5_pre_relu/conv 63 </option>
+                                <option value='mixed4d_pool_reduce_pre_relu/conv'>mixed4d_pool_reduce_pre_relu/conv 63 </option>
+                                <option value='mixed4e_1x1_pre_relu/conv'>mixed4e_1x1_pre_relu/conv 255 </option>
+                                <option value='mixed4e_3x3_bottleneck_pre_relu/conv'>mixed4e_3x3_bottleneck_pre_relu/conv 159 </option>
+                                <option value='mixed4e_3x3_pre_relu/conv'>mixed4e_3x3_pre_relu/conv 319 </option>
+                                <option value='mixed4e_5x5_bottleneck_pre_relu/conv'>mixed4e_5x5_bottleneck_pre_relu/conv 31 </option>
+                                <option value='mixed4e_5x5_pre_relu/conv'>mixed4e_5x5_pre_relu/conv 127 </option>
+                                <option value='mixed4e_pool_reduce_pre_relu/conv'>mixed4e_pool_reduce_pre_relu/conv 127 </option>
+                                <option value='mixed5a_1x1_pre_relu/conv'>mixed5a_1x1_pre_relu/conv 255 </option>
+                                <option value='mixed5a_3x3_bottleneck_pre_relu/conv'>mixed5a_3x3_bottleneck_pre_relu/conv 159 </option>
+                                <option value='mixed5a_3x3_pre_relu/conv'>mixed5a_3x3_pre_relu/conv 319 </option>
+                                <option value='mixed5a_5x5_bottleneck_pre_relu/conv'>mixed5a_5x5_bottleneck_pre_relu/conv 47 </option>
+                                <option value='mixed5a_5x5_pre_relu/conv'>mixed5a_5x5_pre_relu/conv 127 </option>
+                                <option value='mixed5a_pool_reduce_pre_relu/conv'>mixed5a_pool_reduce_pre_relu/conv 127 </option>
+                                <option value='mixed5b_1x1_pre_relu/conv'>mixed5b_1x1_pre_relu/conv 383 </option>
+                                <option value='mixed5b_3x3_bottleneck_pre_relu/conv'>mixed5b_3x3_bottleneck_pre_relu/conv 191 </option>
+                                <option value='mixed5b_3x3_pre_relu/conv'>mixed5b_3x3_pre_relu/conv 383 </option>
+                                <option value='mixed5b_5x5_bottleneck_pre_relu/conv'>mixed5b_5x5_bottleneck_pre_relu/conv 47 </option>
+                                <option value='mixed5b_5x5_pre_relu/conv'>mixed5b_5x5_pre_relu/conv 127 </option>
+                                <option value='mixed5b_pool_reduce_pre_relu/conv'>mixed5b_pool_reduce_pre_relu/conv 127 </option>
+                                <option value='head0_bottleneck_pre_relu/conv'>head0_bottleneck_pre_relu/conv 127 </option>
+                                <option value='head1_bottleneck_pre_relu/conv'>head1_bottleneck_pre_relu/conv 127 </option>
                             </select>
+                        </div>
+                        <div>
+                            channel:
+                            <input type="number" min="1" step="1" name="ch" value="1">
                         </div>
                         iterations:
                         <input id="iterations" type="number" min="1" step="1" max="1000" name="iterations" value="1">
@@ -181,7 +232,7 @@
                 <center>
                     <pre id="chatpane"></pre>
                 </center>
-                <audio class="my_audio" controls preload="none">
+                <audio id="my_audio" class="my_audio" controls preload="none">
                     <source src="public/x.mp3" type="audio/mp3">
                 </audio>
 
@@ -189,6 +240,7 @@
                 <button onclick="play_audio('stop')">STOP</button>
             </div>
             <script>
+                document.getElementById('my_audio').muted = true;
                 $(".my_audio").trigger('load');
                 function play_audio(task) {
                     if (task == 'play') {
