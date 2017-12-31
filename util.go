@@ -20,6 +20,7 @@ import (
 // Log is exported to not conflict w/ log(which gofmt was giving me troubles with when using with VSCode )
 var Log = logrus.New()
 var currentUser string
+var haiku = haikunator.New(time.Now().UTC().UnixNano())
 
 func init() {
 	// let's log output for later grepping
@@ -105,6 +106,14 @@ func ensureBindDirs() error {
 			Log.Error("failed os.Mkdir", err)
 		}
 		Log.Info("bind logs was created")
+	}
+	screens := fmt.Sprintf("%s/screens", basePath)
+	if _, err := os.Stat(screens); os.IsNotExist(err) {
+		err := os.Mkdir(screens, 0777)
+		if err != nil {
+			Log.Error("failed os.Mkdir", err)
+		}
+		Log.Info("screens dir was created")
 	}
 	return nil
 }
@@ -213,6 +222,5 @@ func alreadyHave(path string) bool {
 }
 func renamer(n string) string {
 	fmt.Print("\n We had to rename the file")
-	h := haikunator.New(time.Now().UTC().UnixNano())
-	return fmt.Sprintf("%s%s", n, h.Haikunate())
+	return fmt.Sprintf("%s%s", n, haiku.Haikunate())
 }

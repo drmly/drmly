@@ -80,7 +80,7 @@ def define_args():
     parser.add_argument(
         "-ow", "--ocwaver", help="randomize the number of octaves up and down by this amount", default="0")
     parser.add_argument(
-        "-os", "--ocscale", help="specify the float of octaves scale", type=float, choices=[Range(0.1, 4.0)], default="0")
+        "-os", "--ocscale", help="specify the float of octaves scale", type=float, choices=[Range(0.1, 4.0)], default="1.1")
     return parser.parse_args()
 
 

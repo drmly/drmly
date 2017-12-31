@@ -17,6 +17,9 @@ import (
 var isJob bool
 var basePath string
 
+type dream struct {
+}
+
 // Truncate todo
 func Truncate(t time.Time) time.Time {
 	return t.Truncate(24 * time.Hour)
@@ -271,8 +274,16 @@ func Dream(c *gin.Context) {
 		mel.Broadcast([]byte(z))
 	}
 	Log.Info("done w/ dream loop, python said: ", string(cmd))
+	// add metadata file
+	la = strings.Replace(la, "/", "", 1) //we want a file not to make a /conv directory or w/e
+	// f, err := os.Create(outputPath + "/it" + it + "oc" + oc + "ch" + ch + "os" + ocs + "la" + la)
+	// if err != nil {
+	// 	Log.Error("failed to make metadata file: ", err)
+	// }
+	// f.Close()
+	// make a jpg, cause png's are hella MB, and who wants that on /r/ or fb? nobody cause it fk's dl speed
 	if !itsAVideo {
-		_, err := exec.Command("ffmpeg", "-i", outputPath+"/1.png", outputPath+"/1.jpg").CombinedOutput()
+		_, err := exec.Command("ffmpeg", "-i", outputPath+"/1.png", outputPath+"/it"+it+"oc"+oc+"ch"+ch+"os"+ocs+"la"+la+".jpg").CombinedOutput()
 		if err != nil {
 			Log.Error("failed to jpg the png", err)
 		}
