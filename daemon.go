@@ -2,6 +2,7 @@
 package main
 
 import (
+	"fmt"
 	"net"
 	"os"
 	"os/signal"
@@ -48,6 +49,10 @@ func (service *Service) Manage() (string, error) {
 			return service.Stop()
 		case "status":
 			return service.Status()
+		case "d":
+			fmt.Println("dev mode")
+		// case "d":
+		// 	fmt.Println("dev mode")
 		default:
 			return usage, nil
 		}

@@ -83,3 +83,11 @@
 [[constraint]]
   branch = "master"
   name = 	"github.com/olahol/melody"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/lelenanam/screenshot"
+
+[[constraint]]
+  name = "github.com/radovskyb/watcher"
+  version = "1.0.2"

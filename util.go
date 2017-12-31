@@ -20,6 +20,7 @@ import (
 // Log is exported to not conflict w/ log(which gofmt was giving me troubles with when using with VSCode )
 var Log = logrus.New()
 var currentUser string
+var haiku = haikunator.New(time.Now().UTC().UnixNano())
 
 func init() {
 	// let's log output for later grepping
@@ -106,32 +107,34 @@ func ensureBindDirs() error {
 		}
 		Log.Info("bind logs was created")
 	}
+	images := fmt.Sprintf("%s/images", basePath)
+	if _, err := os.Stat(images); os.IsNotExist(err) {
+		err := os.Mkdir(images, 0777)
+		if err != nil {
+			Log.Error("failed os.Mkdir", err)
+		}
+		Log.Info("images dir was created")
+	}
+	work := fmt.Sprintf("%s/images/work", basePath)
+	if _, err := os.Stat(work); os.IsNotExist(err) {
+		err := os.Mkdir(work, 0777)
+		if err != nil {
+			Log.Error("failed os.Mkdir", err)
+		}
+		Log.Info("work dir was created")
+	}
+	dir, err = filepath.Abs(filepath.Dir(os.Args[0]))
+	if err != nil {
+		Log.Fatal(err)
+	}
+	fmt.Println("dir is ", dir)
+	err = CopyDir(dir+"/public", basePath+"/public"); if err != nil {
+		Log.Info("skipping copying templates dir", err)
+	}
+	err = CopyFile(dir+"/folder.py", basePath+"/folder.py")
 	return nil
 }
 
-// saveFile will save whatever file it can
-func saveFile(c *gin.Context) (string, string, error) {
-	file, err := c.FormFile("file")
-	if err != nil {
-		Log.Info("failed to get file", err)
-	}
-	name := strings.Split(file.Filename, ".")[0]
-	path := fmt.Sprintf("%s/frames/%s", basePath, name)
-	if alreadyHave(path) {
-		name = renamer(name)
-		path = fmt.Sprintf("$HOME/Desktop/%s", name)
-		Log.Info("\nwe renamed as: ", name)
-	}
-	// updateUser(name, c)
-
-	// save the file
-	savedFile := fmt.Sprintf("frames/%s/%s", name, file.Filename)
-	if err := c.SaveUploadedFile(file, savedFile); err != nil {
-		// c.String(http.StatusBadRequest, fmt.Sprintf("upload file err: %s", err.Error()))
-		Log.Fatal("failed to save", err)
-	}
-	return "", "", errors.New("failed to save file")
-}
 
 // checkFile sort out what kind of file it is and if we support it, else error
 func checkFile(c *gin.Context) (string, error) {
@@ -213,6 +216,5 @@ func alreadyHave(path string) bool {
 }
 func renamer(n string) string {
 	fmt.Print("\n We had to rename the file")
-	h := haikunator.New(time.Now().UTC().UnixNano())
-	return fmt.Sprintf("%s%s", n, h.Haikunate())
+	return fmt.Sprintf("%s%s", n, haiku.Haikunate())
 }

@@ -51,7 +51,6 @@ func Dream(c *gin.Context) {
 	iw := c.PostForm("iw")
 	rle := c.PostForm("rle")
 	ocs := c.PostForm("ocscale")
-	ch := c.PostForm("ch")
 	// stretch:=c.Postform("stretchvideo")
 	isJob = true
 	defer func() {
@@ -259,10 +258,9 @@ func Dream(c *gin.Context) {
 			Log.Info("made frames from MP4 with cmd: ", string(cmd))
 		}
 	}
-	Log.Info("ch is : ", ch)
 	Log.Info("entering dreamer goroutine")
 	// deep dream the frames
-	cmd, err := exec.Command("python3", "folder.py", "--input", framesDirPath, "-ch", ch, "-os", ocs, "-it", it, "-oc", oc, "-la", la, "-rl", rl, "-rle", rle, "-li", li, "-iw", iw, "-ow", ow).CombinedOutput()
+	cmd, err := exec.Command("python3", "folder.py", "--input", framesDirPath, "-os", ocs, "-it", it, "-oc", oc, "-la", la, "-rl", rl, "-rle", rle, "-li", li, "-iw", iw, "-ow", ow).CombinedOutput()
 	if err != nil {
 		Log.WithFields(logrus.Fields{
 			"event": "folder.py",
@@ -271,11 +269,20 @@ func Dream(c *gin.Context) {
 		mel.Broadcast([]byte(z))
 	}
 	Log.Info("done w/ dream loop, python said: ", string(cmd))
+	// add metadata file
+	la = strings.Replace(la, "/", "", 1) //we want a file not to make a /conv directory or w/e
+	// f, err := os.Create(outputPath + "/it" + it + "oc" + oc + "ch" + ch + "os" + ocs + "la" + la)
+	// if err != nil {
+	// 	Log.Error("failed to make metadata file: ", err)
+	// }
+	// f.Close()
+	// make a jpg, cause png's are hella MB, and who wants that on /r/ or fb? nobody cause it fk's dl speed
 	if !itsAVideo {
-		_, err := exec.Command("ffmpeg", "-i", outputPath+"/1.png", outputPath+"/1.jpg").CombinedOutput()
+		cmd, err := exec.Command("ffmpeg", "-i", outputPath+"/1.png", basePath+"/images/"+"it"+it+"oc"+oc+"os"+ocs+"la"+la+".jpg").CombinedOutput()
 		if err != nil {
 			Log.Error("failed to jpg the png", err)
 		}
+		Log.Info("jpg'd to ", string(cmd))
 		return //if it's not a video, don't make an output.mp4
 	}
 	// put frames together into an mp4 in videos dir
