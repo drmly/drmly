@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-	srv, err := daemon.New(name, description, dependencies...)
+	srv, err := daemon.New(name, description, daemon.SystemDaemon, dependencies...)
 	if err != nil {
 		Log.Error("Error: ", err)
 		os.Exit(1)
